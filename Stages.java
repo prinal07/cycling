@@ -1,6 +1,7 @@
 package cycling;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Stages{
@@ -9,11 +10,14 @@ public class Stages{
     private String stage_name;
     private int stage_length;
     private int stageId;
+    private int raceId; 
+
     private int[] segment_ids_in_stage;
     private static int segment_counter = 0;
     private static int stage_id_counter = 0;
     private double location;
 
+    HashMap <String, Stages> stages_hashmap = new HashMap<String, Stages>();
 
     public void createStage(String segment_type , String stage_type){
         int temp_segment_id;
@@ -34,11 +38,15 @@ public class Stages{
     
 
     private void addStage(int stageId, Double location){
+        createStage(segment_type, stage_type);
+
         //called in all the addIntermediate method calls
     }
 
     private void addStage(int stageId, Double location, SegmentType type, Double averageGradient, Double length){
         //called in all the addcategorizedclimb method calls
+
+    }
 
     }
     

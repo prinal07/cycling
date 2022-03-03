@@ -82,6 +82,8 @@ public class BadCyclingPortal implements CyclingPortalInterface {
 	@Override
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
+				
+
 		// TODO Auto-generated method stub
 		return 0;
 	}
