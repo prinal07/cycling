@@ -22,6 +22,14 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
         return(riderId);
     }
 
+    public Riders(){
+
+    }
+
+    public Riders(String name, int yearOfBirth){
+        this.name = name;
+        this.yearOfBirth = yearOfBirth;
+    }
     
     public int getRiderId(){
         return(this.riderId);
@@ -30,6 +38,7 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
     public void removeRider(int riderId){
         //Need to finish this
     }
+    
 
 }
 

@@ -34,6 +34,9 @@ public class Teams {
         teamId_list[ctr++] = teamId;
     } 
     
+    public int[] getRiderIdList(){
+        return riders_list;
+    }
 //addRider is needed to add a rider to a new team after being removed
     public void addRider(int riderId, int teamId){
         for (int i:teamId_list){
@@ -44,14 +47,6 @@ public class Teams {
                 //add exception and assertion...
             }
         }
-    }
-
-    public int[] getTeams(){
-        return(this.teamId_list);
-    }
-
-    public int[] getTeamRiders(int teamId){
-        return riders_list;
     }
 
     public void removeRider(int riderId){

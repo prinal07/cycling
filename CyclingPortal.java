@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import javax.swing.text.html.AccessibleHTML.TextElementInfo.TextAccessibleContext;
-
 public class CyclingPortal implements CyclingPortalInterface{
 
     public int[] getRaceIds() {
@@ -106,13 +104,26 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
-		return null;
+        //add exception for id not recognised
+		Teams local_team = Teams.teamsHashMap.get(teamId);
+        int [] riderIdList = local_team.getRiderIdList();
+
+        return riderIdList;
 	}
 
 	
 	public int createRider(int teamID, String name, int yearOfBirth)
 			throws IDNotRecognisedException, IllegalArgumentException {
-				return 0;
+                int local_rider_id;
+                Riders rider = new Riders(name, yearOfBirth);
+                local_rider_id = ++Riders.total_riders;
+
+                Teams team = new Teams();
+                team.addRider(local_rider_id, teamID);
+                //figure out how to do this without instantiating an empty object. 
+
+        return local_rider_id;
+                
 	}
 
 	
