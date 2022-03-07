@@ -84,16 +84,16 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
-        Teams team = new Teams();
+        int local_team_id;
+        Teams team = new Teams(name, description);
         team.setName(name);
         team.setDescription(description);
 
-        //++ logic might not work, then add line x = Team.total_teams
-        team.setTeamId(++Teams.total_teams);
+        local_team_id = ++Teams.total_teams;
+        team.setTeamId(local_team_id);
+        team.addTeamIdToList(local_team_id);
         
-        teamId_list[total_teams - 1] = teamId;
-
-        return
+        return local_team_id;
 	}
 
 	
