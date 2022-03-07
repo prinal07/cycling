@@ -20,7 +20,7 @@ public class Races {
         this.description = description;
     }
 
-    //not sure if this is needed...
+    //not sure if this is needed... 
     public void setStagesHashMap(HashMap<String, Stages> stages_hashmap){
         this.stages_hashmap = stages_hashmap;
     }
