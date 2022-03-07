@@ -7,10 +7,32 @@ public class Teams {
     private String description;
     public static int total_teams = 0;
     private int teamId;
+    public static int ctr = 0; 
     public int[] teamId_list = new int[22];  //changed this to normal list as getTeams says the return type needs to be an int[], google says 22 teams in grand tour...
     private int[] riders_list = new int[9];
 
    
+    public void setName(String name){
+        this.name = name;
+    }
+ 
+    public void setDescription(String description){
+        this.description = description;
+    }
+    
+    //not sure if it is needed
+    public int getTeamId(){
+        return(teamId);
+    }
+
+    public void setTeamId(int teamId){
+        this.teamId = teamId;
+    }
+
+    public void addTeamIdToList(int teamId){
+
+    } 
+    
     public int createTeam(String name, String description){
         this.name = name;
         this.description = description;
