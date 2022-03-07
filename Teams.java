@@ -1,5 +1,6 @@
 package cycling; 
 
+import java.security.cert.PKIXBuilderParameters;
 import java.util.*;
 
 public class Teams {
@@ -11,12 +12,11 @@ public class Teams {
     public int[] teamId_list = new int[22];  //changed this to normal list as getTeams says the return type needs to be an int[], google says 22 teams in grand tour...
     private int[] riders_list = new int[9];
 
-   
-    public void setName(String name){
-        this.name = name;
+    public Teams(){  
     }
- 
-    public void setDescription(String description){
+   
+    public Teams(String name, String description){
+        this.name = name;
         this.description = description;
     }
     
@@ -30,7 +30,7 @@ public class Teams {
     }
 
     public void addTeamIdToList(int teamId){
-
+        teamId_list[ctr++] = teamId;
     } 
     
     public int createTeam(String name, String description){

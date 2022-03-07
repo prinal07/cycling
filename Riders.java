@@ -16,11 +16,12 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
         this.yearOfBirth = yearOfBirth;
         riderId = ++total_riders;
 
-        Teams team = new Teams();               //creating a teams object to access the method with static values.
+        Teams team = new Teams();          
         team.addRider(riderId, teamID);
 
         return(riderId);
     }
+
     
     public int getRiderId(){
         return(this.riderId);
