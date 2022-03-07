@@ -1,6 +1,8 @@
+package cycling; 
+
 import java.util.*;
 
-public class Teams implements CyclingPortalInterface {
+public class Teams {
     private String name;
     private String description;
     public static int total_teams = 0;
@@ -8,6 +10,7 @@ public class Teams implements CyclingPortalInterface {
     public int[] teamId_list = new int[22];  //changed this to normal list as getTeams says the return type needs to be an int[], google says 22 teams in grand tour...
     private int[] riders_list = new int[9];
 
+   
     public int createTeam(String name, String description){
         this.name = name;
         this.description = description;
@@ -18,7 +21,7 @@ public class Teams implements CyclingPortalInterface {
 
     } 
 
-
+//addRider is needed to add a rider to a new team after being removed
     public void addRider(int riderId, int teamId){
         for (int i:teamId_list){
             if (teamId == teamId_list[i]){

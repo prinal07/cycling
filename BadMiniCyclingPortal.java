@@ -22,6 +22,9 @@ public class BadMiniCyclingPortal implements MiniCyclingPortalInterface {
 
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
+		Races race = new Races();
+		race.set_Name_and_Description(name, description);
+
 		// TODO Auto-generated method stub
 		return 0;
 	}
