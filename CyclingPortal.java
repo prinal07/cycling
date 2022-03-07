@@ -86,12 +86,11 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
         int local_team_id;
         Teams team = new Teams(name, description);
-        team.setName(name);
-        team.setDescription(description);
-
         local_team_id = ++Teams.total_teams;
         team.setTeamId(local_team_id);
         team.addTeamIdToList(local_team_id);
+
+        Teams.teamsHashMap.put(local_team_id, team);
         
         return local_team_id;
 	}
@@ -101,9 +100,8 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	}
 
-	
 	public int[] getTeams() {
-		return null;
+		return Teams.teamId_list;
 	}
 
 	

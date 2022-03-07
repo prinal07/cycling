@@ -8,7 +8,7 @@ public class Races {
     private int number_of_stages;
     private int total_length; 
     private Stages[] all_stage_objects;
-    private HashMap <String, Stages> stages_hashmap; 
+    private HashMap <Integer, Stages> stages_hashmap; 
     //The sum of all the stages' length
 
     public void groupStages(Stages[] some_list_of_stage_objects){

@@ -1,6 +1,5 @@
 package cycling; 
 
-import java.security.cert.PKIXBuilderParameters;
 import java.util.*;
 
 public class Teams {
@@ -9,8 +8,10 @@ public class Teams {
     public static int total_teams = 0;
     private int teamId;
     public static int ctr = 0; 
-    public int[] teamId_list = new int[22];  //changed this to normal list as getTeams says the return type needs to be an int[], google says 22 teams in grand tour...
+    public static int riderCount = 0;
+    public static int[] teamId_list = new int[22];  //changed this to normal list as getTeams says the return type needs to be an int[], google says 22 teams in grand tour...
     private int[] riders_list = new int[9];
+    public static HashMap<Integer, Teams> teamsHashMap = new HashMap<>();
 
     public Teams(){  
     }
@@ -33,21 +34,11 @@ public class Teams {
         teamId_list[ctr++] = teamId;
     } 
     
-    public int createTeam(String name, String description){
-        this.name = name;
-        this.description = description;
-        teamId = ++total_teams;
-        teamId_list[total_teams - 1] = teamId;
-
-        return(teamId);
-
-    } 
-
 //addRider is needed to add a rider to a new team after being removed
     public void addRider(int riderId, int teamId){
         for (int i:teamId_list){
             if (teamId == teamId_list[i]){
-                riders_list[i] = (riderId);
+                riders_list[riderCount++] = (riderId);
             }
             else{
                 //add exception and assertion...
