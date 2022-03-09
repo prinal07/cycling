@@ -1,10 +1,9 @@
 package cycling;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 
 public class Stages{
     private StageType stage_type;
@@ -19,25 +18,15 @@ public class Stages{
     private double length;
     private LocalDateTime startTime;
 
-    private int[] segment_ids_in_stage;
-    private static int segment_counter = 0;
+    private int[] segment_ids;
+    private int segments_in_stage = 0;
     private SegmentType segment_type;
+    public static int segment_counter = 0; //Total segments in entirety.
+    public static HashMap <Integer, Stages> stages_hashmap; 
 
-
-
-    HashMap <String, Stages> stages_hashmap = new HashMap<String, Stages>();
-
-    public void createStage(SegmentType segment_type , StageType stage_type){
-        int temp_segment_id;
-        int segment_id_ctr = 0;
-
-        this.segment_type = segment_type;
-        this.stage_type = stage_type;
-        this.stageId = stage_id_counter + 10;
-        
-        temp_segment_id = ++segment_id_ctr;
-        segment_ids_in_stage[segment_counter++] = temp_segment_id;
-    }
+    public static HashMap <Integer, Integer> segmentIdsAndPos;
+    private HashMap <Integer, SegmentType> segmentValuesAndPos;
+    private static int index_ctr;
 
     public Stages(String stageName, String description, double length, LocalDateTime startTime){
         this.stage_name = stageName;
@@ -51,20 +40,16 @@ public class Stages{
     }
 
     public int[] getStageSegment(){
-        return segment_ids_in_stage;
+        return segment_ids;
     }
 
-    
+    public void addSegmentIdToArray(int segmentId){
+        this.segment_ids[segments_in_stage++] = segmentId;
 
-    private void addStage(int stageId, Double location){
-        createStage(segment_type, stage_type);
-
-        //called in all the addIntermediate method calls
     }
 
-    private void addStage(int stageId, Double location, SegmentType type, Double averageGradient, Double length){
-        //called in all the addcategorizedclimb method calls
-
+    public int getTotalSegmentsInStage(){
+        return segments_in_stage;
     }
 
 }
