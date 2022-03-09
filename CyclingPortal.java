@@ -1,6 +1,7 @@
 package cycling;
 
 import java.io.IOException;
+import java.security.Signer;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -31,7 +32,9 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	
 	public int getNumberOfStages(int raceId) throws IDNotRecognisedException {
-		return 0;
+		Races race = Races.races_hashmap.get(raceId);
+		int number_of_stages = race.getNumberOfStages();
+		return number_of_stages;
 	}
 
 	
@@ -52,8 +55,8 @@ public class CyclingPortal implements CyclingPortalInterface{
 	
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
 		Races race = Races.races_hashmap.get(raceId);
-		race;
-		return null;
+		int[] stages_ids = race.getStagesIds();
+		return stages_ids;
 	}
 
 	
@@ -76,9 +79,17 @@ public class CyclingPortal implements CyclingPortalInterface{
 	
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
-				
+				Stages stage = Stages.stages_hashmap.get(stageId);
+				int temp_segment_id = Stages.segment_counter++;
+				stage.addSegmentIdToArray(temp_segment_id);
+				SegmentType a = SegmentType.C1;
+				a.setSegmentId(1);
 
-		return 0;
+				
+///////LOOK AT THIS FUNCTION AGAIN, segment ids are in a simple array, is the order 
+///////they're inserted in preserved? like after a segment is removed what happens to the order?
+
+		return temp_segment_id;
 	}
 
 	

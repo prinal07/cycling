@@ -45,4 +45,15 @@ public enum SegmentType {
 	 * toughest of the tough. The longest or steepest climbs, often both combined.
 	 */
 	HC;
+
+	private int segmentId;
+	
+	public void setSegmentId(int segment_id){
+		this.segmentId = segment_id;
+	}
+
+	public int getSegmentId(){
+		return this.segmentId;
+	}
+
 }

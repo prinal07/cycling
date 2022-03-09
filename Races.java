@@ -1,22 +1,20 @@
 package cycling;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.*;
 
 public class Races {
     private int raceId;
     private String name;
     private String description;
-    private int number_of_stages;
+    private int number_of_stages = 0;
     private int total_length;     //The sum of all the stages' length
-    private Stages[] all_stage_objects;
+    private Stages[] all_stage_objects; ///not used and needed...  remove...
     public static int total_races = 0;
-    private HashMap <Integer, Stages> stages_hashmap; 
+    private int[] all_segments;
+
     public static HashMap <Integer, Races> races_hashmap; 
-    private int [] StageIdArray = new int[21]; //google says there are 21 stages in the grand tour
+    private int [] stageIdArray = new int[21]; //google says there are 21 stages in the grand tour
 
     public void groupStages(Stages[] some_list_of_stage_objects){
-
     }
 
     public Races(){
@@ -35,13 +33,18 @@ public class Races {
         return (this.raceId);
     }
 
-    public void addToStagesHashMap(int key, Stages stage){
-        this.stages_hashmap.put(key, stage);
+    public int getNumberOfStages(){
+        return (this.number_of_stages);
     }
 
-    public void 
+    public void addToStagesHashMap(int key, Stages stage){
+        Stages.stages_hashmap.put(key, stage);
+        int local_number_of_stages = this.number_of_stages++;
+        stageIdArray[local_number_of_stages] = key;
+    }
 
     public int[] getStagesIds(){
+        return this.stageIdArray;
         
     }
 }
