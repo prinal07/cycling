@@ -23,7 +23,7 @@ public class Teams {
     
     //not sure if it is needed
     public int getTeamId(){
-        return(teamId);
+        return(this.teamId);
     }
 
     public void setTeamId(int teamId){

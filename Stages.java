@@ -1,25 +1,33 @@
 package cycling;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class Stages{
-    private String segment_type;
-    private String stage_type;
+    private StageType stage_type;
     private String stage_name;
     private int stage_length;
     private int stageId;
     private int raceId; 
+    private String description;
+    private String stage_state;
+    public static int total_stages = 0;
+    private Double location;
+    private double length;
+    private LocalDateTime startTime;
 
     private int[] segment_ids_in_stage;
     private static int segment_counter = 0;
-    private static int stage_id_counter = 0;
-    private double location;
+    private SegmentType segment_type;
+
+
 
     HashMap <String, Stages> stages_hashmap = new HashMap<String, Stages>();
 
-    public void createStage(String segment_type , String stage_type){
+    public void createStage(SegmentType segment_type , StageType stage_type){
         int temp_segment_id;
         int segment_id_ctr = 0;
 
@@ -29,6 +37,17 @@ public class Stages{
         
         temp_segment_id = ++segment_id_ctr;
         segment_ids_in_stage[segment_counter++] = temp_segment_id;
+    }
+
+    public Stages(String stageName, String description, double length, LocalDateTime startTime){
+        this.stage_name = stageName;
+        this.description = description;
+        this.length = length;
+        this.startTime = startTime;
+    }
+
+    public void setStageId(int stageId){
+        this.stageId = stageId;
     }
 
     public int[] getStageSegment(){

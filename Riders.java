@@ -23,7 +23,6 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
     }
 
     public Riders(){
-
     }
 
     public Riders(String name, int yearOfBirth){
@@ -33,6 +32,10 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
     
     public int getRiderId(){
         return(this.riderId);
+    }
+
+    public void setRiderId(int riderId){
+        this.riderId = riderId;
     }
 
     public void removeRider(int riderId){

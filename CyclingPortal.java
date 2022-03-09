@@ -11,7 +11,13 @@ public class CyclingPortal implements CyclingPortalInterface{
 	}
 
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
-		return 0;
+		Races race = new Races(name, description);
+		int local_total_races = Races.total_races ++;
+		int local_race_id = local_total_races*10;
+		race.setRaceId(local_race_id);
+		Races.races_hashmap.put(local_race_id, race);
+
+		return (local_race_id);
 	}
 
 	public String viewRaceDetails(int raceId) throws IDNotRecognisedException {
@@ -32,11 +38,21 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
-		return 0;
+				Stages stage = new Stages(stageName, description, length, startTime);
+				int local_total_stages = Stages.total_stages++;
+				int temp_stage_id = local_total_stages*2;
+				stage.setStageId(temp_stage_id);
+				
+				Races race = Races.races_hashmap.get(raceId);
+				race.addToStagesHashMap(temp_stage_id, stage);
+
+		return temp_stage_id;
 	}
 
 	
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
+		Races race = Races.races_hashmap.get(raceId);
+		race;
 		return null;
 	}
 
@@ -117,11 +133,15 @@ public class CyclingPortal implements CyclingPortalInterface{
                 int local_rider_id;
                 Riders rider = new Riders(name, yearOfBirth);
                 local_rider_id = ++Riders.total_riders;
+				rider.setRiderId(local_rider_id);
 
-                Teams team = new Teams();
+				Teams team = new Teams();
                 team.addRider(local_rider_id, teamID);
                 //figure out how to do this without instantiating an empty object. 
+				//could avoid this by not using the addRider method, and by implementing the logic here.
 
+				Teams.teamsHashMap.get(teamID).getRiderIdList();
+				
         return local_rider_id;
                 
 	}
