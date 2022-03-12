@@ -5,6 +5,8 @@ import java.security.Signer;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import javax.swing.ToolTipManager;
+
 public class CyclingPortal implements CyclingPortalInterface{
 
     public int[] getRaceIds() {
@@ -42,9 +44,11 @@ public class CyclingPortal implements CyclingPortalInterface{
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
 				Stages stage = new Stages(stageName, description, length, startTime);
-				int local_total_stages = Stages.total_stages++;
+				int local_total_stages = Stages.total_stages;
 				int temp_stage_id = local_total_stages*2;
 				stage.setStageId(temp_stage_id);
+
+				Stages.stages_and_segments_array[Stages.total_stages++][0] = temp_stage_id;
 				
 				Races race = Races.races_hashmap.get(raceId);
 				race.addToStagesHashMap(temp_stage_id, stage);
@@ -80,11 +84,12 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
 				Stages stage = Stages.stages_hashmap.get(stageId);
-				int temp_segment_id = Stages.segment_counter++;
-				stage.addSegmentIdToArray(temp_segment_id);
-				SegmentType a = SegmentType.C1;
-				a.setSegmentId(1);
+				int temp_segment_id = (Stages.segment_counter)*2;
+				stage.addSegmentIdToArray(temp_segment_id, stageId);
+				stage.addSegmentDataToArray(SegmentType.SPRINT);
 
+				//might have to introduce another counter variable, using segment_counter might cause problemms in addSegmentIdToArray
+				
 				
 ///////LOOK AT THIS FUNCTION AGAIN, segment ids are in a simple array, is the order 
 ///////they're inserted in preserved? like after a segment is removed what happens to the order?
@@ -92,8 +97,10 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return temp_segment_id;
 	}
 
-	
+	//do we assume this will be called like Stages.removeSegment? or just removeSegment();???
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
+		int pos = Stages.findSegment(segmentId);
+
 
 	}
 
