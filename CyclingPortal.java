@@ -85,8 +85,12 @@ public class CyclingPortal implements CyclingPortalInterface{
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
 				Stages stage = Stages.stages_hashmap.get(stageId);
 				int temp_segment_id = (Stages.segment_counter)*2;
-				stage.addSegmentIdToArray(temp_segment_id, stageId);
-				stage.addSegmentDataToArray(SegmentType.SPRINT);
+
+				stage.addSegmentIdAndValue(temp_segment_id, SegmentType.valueOf("SPRINT"));
+				Stages.addSegmentToHashMap(stageId, temp_segment_id);
+
+				// stage.addSegmentIdToArray(temp_segment_id, stageId);
+				// stage.addSegmentDataToArray(SegmentType.SPRINT);
 
 				//might have to introduce another counter variable, using segment_counter might cause problemms in addSegmentIdToArray
 				
@@ -97,11 +101,12 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return temp_segment_id;
 	}
 
-	//do we assume this will be called like Stages.removeSegment? or just removeSegment();???
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
-		int pos = Stages.findSegment(segmentId);
+		int stageId = Stages.segment_and_stage_ids.get(segmentId);
+		Stages stage = Stages.stages_hashmap.get(stageId);
 
-
+		Stages.segment_and_stage_ids.remove(segmentId);
+		stage.removeSegmentFromObjectList(stage.searchSegments(segmentId));
 	}
 
 	
@@ -111,6 +116,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
+		Stages stage = Stages.stages_hashmap.get(stageId);
 		return null;
 	}
 
