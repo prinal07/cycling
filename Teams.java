@@ -7,10 +7,14 @@ public class Teams {
     private String description;
     public static int total_teams = 0;
     private int teamId;
-    public static int ctr = 0; 
+    public static int id_index = 0; 
     public static int riderCount = 0;
-    public static int[] teamId_list = new int[22];  //changed this to normal list as getTeams says the return type needs to be an int[], google says 22 teams in grand tour...
+    
+    public static int[] teamId_list = new int[22];  //googled the number of teams, and feel like should be some fixed number, which can be changed if needed.
+    //public static ArrayList<Integer> teamIds = new ArrayList<>(22);
+
     private int[] riders_list = new int[9];
+
     public static HashMap<Integer, Teams> teamsHashMap = new HashMap<>();
 
     public Teams(){  
@@ -31,7 +35,8 @@ public class Teams {
     }
 
     public void addTeamIdToList(int teamId){
-        teamId_list[ctr++] = teamId;
+        teamId_list[id_index++] = teamId;
+        //teamIds.add(teamId);
     } 
     
     public int[] getRiderIdList(){
@@ -49,7 +54,8 @@ public class Teams {
         }
     }
 
-    public void removeRider(int riderId){
+    public void remove(int riderId){
+
     }
 
 }

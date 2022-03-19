@@ -39,7 +39,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return number_of_stages;
 	}
 
-	
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
@@ -48,8 +47,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 				int temp_stage_id = local_total_stages*2;
 				stage.setStageId(temp_stage_id);
 
-				Stages.stages_and_segments_array[Stages.total_stages++][0] = temp_stage_id;
-				
 				Races race = Races.races_hashmap.get(raceId);
 				race.addToStagesHashMap(temp_stage_id, stage);
 
@@ -65,7 +62,8 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	
 	public double getStageLength(int stageId) throws IDNotRecognisedException {
-		return 0;
+		Stages stage = Stages.stages_hashmap.get(stageId);
+		return stage.getLength();
 	}
 
 	
@@ -104,9 +102,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
 		int stageId = Stages.segment_and_stage_ids.get(segmentId);
 		Stages stage = Stages.stages_hashmap.get(stageId);
-
-		Stages.segment_and_stage_ids.remove(segmentId);
-		stage.removeSegmentFromObjectList(stage.searchSegments(segmentId));
+		stage.removeSegmentFromObjectList(segmentId);
 	}
 
 	
@@ -117,7 +113,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
 		Stages stage = Stages.stages_hashmap.get(stageId);
-		return null;
+		return stage.getStageSegments();
 	}
 
 	
@@ -159,13 +155,9 @@ public class CyclingPortal implements CyclingPortalInterface{
                 local_rider_id = ++Riders.total_riders;
 				rider.setRiderId(local_rider_id);
 
-				Teams team = new Teams();
-                team.addRider(local_rider_id, teamID);
-                //figure out how to do this without instantiating an empty object. 
-				//could avoid this by not using the addRider method, and by implementing the logic here.
-
-				Teams.teamsHashMap.get(teamID).getRiderIdList();
-				
+				Teams team = Teams.teamsHashMap.get(teamID);
+                team.addRider(local_rider_id, teamID);	
+				//Teams.teamsHashMap.get(teamID).getRiderIdList();	
         return local_rider_id;
                 
 	}
@@ -179,7 +171,9 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
 			throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
 			InvalidStageStateException {
-		
+				
+				Stages.stages_hashmap.get(stageId)
+				.addResultsToStage(riderId, checkpoints);		
 	}
 
 	
