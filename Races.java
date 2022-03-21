@@ -1,4 +1,6 @@
 package cycling;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Races {
@@ -45,8 +47,12 @@ public class Races {
 
     public int[] getStagesIds(){
         return this.stageIdArray;
-        
     }
+    
+    public static void sortRaceStages(int raceId, LocalDateTime[]array){
+		Arrays.sort(array);
+		}
+
 }
 
 
