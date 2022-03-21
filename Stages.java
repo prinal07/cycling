@@ -25,12 +25,15 @@ public class Stages {
     private Double location;
     private double length;
     private LocalDateTime startTime;
-    private int lastRiderElapsedTime = 0;
+    //private int lastRiderElapsedTime = 0;
     private int registeredRiders = 0;
 
     private HashMap<Integer, LocalTime[]> stages_results = new HashMap<>(); // key: riderId, value: checkpoint array
     private ArrayList<Integer> sortedRiderIds = new ArrayList<>();
     private ArrayList<LocalTime[]> sortedElapsedRiderResults = new ArrayList<>();
+    private ArrayList<LocalTime> adjustedElapsedTimes = new ArrayList<>(); 
+    //uses the sortedRiderIds to add corresponding values, 
+    //hence the swapSortElapsedTimes must be executed before this can be used.
 
     // private HashMap<Integer, LocalTime[]> adjusted_elapsed_stages_results = new
     // HashMap<>(); // key: riderId, value: checkpoint array
@@ -67,11 +70,26 @@ public class Stages {
     public void addToElapsedSortedArrays(int index, int riderId, LocalTime[] checkpoints) {
         this.sortedElapsedRiderResults.add(index, checkpoints);
         this.sortedRiderIds.add(index, riderId);
+        this.adjustedElapsedTimes.add(index, LocalTime.of(00, 00, 00));
     }
 
     public LocalTime getLastElapsedTimeInArray(int index) {
         LocalTime[] array = this.sortedElapsedRiderResults.get(index - 1);
         return array[array.length - 1];
+    }
+
+    public LocalTime getElapsedTimeInArray(int index){
+        LocalTime[] array = this.sortedElapsedRiderResults.get(index);
+        return array[array.length - 1];
+    }
+
+    public LocalTime getNextElapsedTimeInArray(int index){
+        LocalTime[] array = this.sortedElapsedRiderResults.get(index+1);
+        return array[array.length - 1];
+    }
+
+    public void setValueInAdjustedTimeArray(int index, LocalTime time){
+        this.adjustedElapsedTimes.set(index, time);
     }
 
     public void swapSortElapsedTimes(int currentPos, int lastPos, LocalTime currentElapsedTime, LocalTime prevTime) {
@@ -92,6 +110,7 @@ public class Stages {
             }
         }
     }
+
 
     public int[] getStageSegments() {
         int[] int_stage_segments = segments_ids_in_stage.stream().mapToInt(Integer::intValue).toArray();
@@ -135,16 +154,13 @@ public class Stages {
     }
 
     public LocalTime[] getRidersResults(int riderId) {
+        registeredRiders ++;
         return stages_results.get(riderId);
 
     }
 
     public LocalDateTime getStartTime() {
         return this.startTime;
-    }
-
-    public void calculateAdjustedElapsedTime() {
-
     }
 
     public ArrayList<Integer> getResultsKeys() {
@@ -159,27 +175,6 @@ public class Stages {
         ArrayList<LocalTime[]> listOfValues = new ArrayList<>(collection);
         // check whether this works...
         return (listOfValues);
-    }
-
-    public void sortResultsAccordingToElapsedTime(){
-        ArrayList<Integer> listOfKeys = getResultsKeys();
-        ArrayList<LocalTime[]> listOfValues = getResultsValues();
-
-        for(int x = 0; x< listOfKeys.size(); x++){
-            LocalTime[] temp_array = listOfValues.get(x);
-            temp_array[temp_array.length - 1];
-
-        }
-
-    }
-
-    public Boolean resultsExistCheck(int riderId) {
-        ArrayList<Integer> keys = getResultsKeys();
-
-    }
-
-    public void updateResultsArrayLists(){
-        this.sortedRiderIds = 
     }
 
 }

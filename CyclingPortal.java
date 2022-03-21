@@ -295,9 +295,27 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return null;
 	}
 
-	public void calculateAdjustedElapsedTimes(int stageId){
-		
+	public void calculateAdjustedElapsedTimes(int index, int stageId) {
+		LocalTime a = Stages.stages_hashmap.get(stageId).getElapsedTimeInArray(index);
+		LocalTime b = Stages.stages_hashmap.get(stageId).getElapsedTimeInArray(++index);
 
+		while (index < Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders()) {
+			int aInSeconds = a.toSecondOfDay();
+			int bInSeconds = b.toSecondOfDay();
+			if ((bInSeconds - aInSeconds) <= 1) {
+				Stages.stages_hashmap.get(stageId).setValueInAdjustedTimeArray(index, a);
+				Stages.stages_hashmap.get(stageId).setValueInAdjustedTimeArray(index + 1, a);
+			}
+
+			a = b;
+			b = Stages.stages_hashmap.get(stageId).getNextElapsedTimeInArray(++index);
+			// SO if index 2 to 13 have consecutive <1 seconds diff, they will take the
+			// value of index 2,
+			// but if then theres another consecutive pattern from index 23 to 30, what
+			// happens?
+		}
+		// HOW DOES THIS MAKE SENSE, IT COULD TECHNICALLY ALSO BE ONE HOUR AHEAD, BUT
+		// BEHIND BY A FEW NANOSECONDS??
 	}
 
 }

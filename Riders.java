@@ -8,7 +8,8 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
     private String name;
     public static int total_riders = 0;
     private int riderId;
-    private java.time.LocalTime adjustedElapsedTimeInStage;
+    //private java.time.LocalTime adjustedElapsedTimeInStage;
+    //there are many stages that 1 rider participates in.
 
     public int createRider(int teamID, String name, int yearOfBirth){
         this.name = name;
