@@ -16,9 +16,6 @@ public class Races {
     public static HashMap <Integer, Races> races_hashmap; 
     private int [] stageIdArray = new int[21]; //google says there are 21 stages in the grand tour
 
-    public void groupStages(Stages[] some_list_of_stage_objects){
-    }
-
     public Races(){
     }
 
@@ -37,6 +34,10 @@ public class Races {
 
     public int getNumberOfStages(){
         return (this.number_of_stages);
+    }
+
+    public int[] getStageIds(){
+        return this.stageIdArray;
     }
 
     public void addToStagesHashMap(int key, Stages stage){

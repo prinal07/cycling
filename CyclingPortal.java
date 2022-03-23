@@ -1,26 +1,23 @@
 package cycling;
 
 import java.io.IOException;
-import java.security.Signer;
-import java.sql.Time;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import javax.lang.model.util.ElementScanner14;
-import javax.naming.spi.DirStateFactory.Result;
-import javax.swing.ToolTipManager;
-import javax.swing.text.AbstractDocument.BranchElement;
-import javax.xml.transform.Templates;
 
 public class CyclingPortal implements CyclingPortalInterface {
+
+	public static int[] flat = { 50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2 };
+	public static int[] medium_mountain = { 30, 25, 22, 19, 17, 15, 13, 11, 9, 7, 6, 5, 4, 3, 2 };
+	public static int[] high_mountain = { 20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+	public static int[] time_trial = { 20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+	public static int[] intermediate_sprint = { 20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+
+	public static int[] C4 = { 1, 0, 0, 0, 0, 0, 0, 0 };
+	public static int[] C3 = { 2, 1, 0, 0, 0, 0, 0, 0 };
+	public static int[] C2 = { 5, 3, 2, 1, 0, 0, 0, 0 };
+	public static int[] C1 = { 10, 8, 6, 4, 2, 1, 0, 0 };
+	public static int[] HC = { 20, 15, 12, 10, 8, 6, 4, 2 };
 
 	public int[] getRaceIds() {
 		return null;
@@ -52,7 +49,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
-		Stages stage = new Stages(stageName, description, length, startTime);
+		Stages stage = new Stages(stageName, description, length, startTime, raceId, type);
 		int local_total_stages = Stages.total_stages;
 		int temp_stage_id = local_total_stages * 2;
 		stage.setStageId(temp_stage_id);
@@ -198,6 +195,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 			if (elapsedTime.isBefore(prevTime)) {
 				stage.swapSortElapsedTimes(index, index - 1, elapsedTime, prevTime);
 			}
+
 		}
 	}
 
@@ -220,9 +218,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 			results[results.length] = elapsedTime;
 			// check if any of this logic works...
-		}
-
-		else {
+		} else {
 			LocalTime[] emptyArray = new LocalTime[0];
 			return emptyArray;
 		}
@@ -232,7 +228,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
-		return null;
+		calculateAdjustedElapsedTimes(0, stageId);
+		int index = Stages.stages_hashmap.get(stageId).getIndexOfSortedRiderId(riderId);
+		LocalTime time = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(index);
+		return time;
 	}
 
 	public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
@@ -240,15 +239,115 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
-		return null;
+		int[] list = Stages.stages_hashmap.get(stageId).getRidersRankList();
+		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() != 0) {
+			return list;
+		} else {
+			int[] emptyList = new int[1];
+			return emptyList;
+		}
+
+		// An empty list if there is no result for the stage.
 	}
 
 	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
+		LocalTime[] list = Stages.stages_hashmap.get(stageId).getRidersRankedAdjustedList();
+		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() != 0) {
+			// can change this if to use a boolean method in stages, that checks if
+			// sortedRiderIds.isEmpty()
+			return list;
+		} else {
+			LocalTime[] emptyList = new LocalTime[1];
+			return emptyList;
+		}
+	}
+
+	// this method below can be ccalled multiple time in the getRidersPointsInRace
+	// method
+	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
+		int raceId = Stages.stages_hashmap.get(stageId).getRaceId();
+		int[] stageIds = Races.races_hashmap.get(raceId).getStageIds();
+
+		for (int stage : stageIds) {
+			StageType type = Stages.stages_hashmap.get(stage).getStageType();
+			int[] riderIds = Stages.stages_hashmap.get(stage).getRidersRankList();
+			for (int rider : riderIds) {
+				// Only need to run the inner points loop 15 times, as points
+				// are only assigned to the first 15 places.
+
+				for (int x = 0; x < 15; x++) {
+					results Stages.stages_hashmap.get(stage).getRidersSortedResults();
+					switch (type) {
+						case FLAT:
+
+						case MEDIUM_MOUNTAIN:
+
+						case HIGH_MOUNTAIN:
+
+						case TT:
+
+					}
+				}
+			}
+		}
 		return null;
 	}
 
-	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
-		return null;
+	public void calculateOneRidersPointsInStage(int stageId, int riderId, String pointsDistributionChoice) {
+		int local_score_total = 0;
+		Stages stage = Stages.stages_hashmap.get(stageId);
+		int[] riderIds = stage.getRidersRankList();
+		int index = stage.getIndexInSortedArrays(riderId);
+		LocalTime[] rider_results = stage.getRidersSortedResultsOfRider(index);
+		ArrayList<SegmentType> segments = stage.getAllSegmentValues();
+		StageType type = stage.getStageType();
+		int registeredRiderCtr = stage.getNumberOfRegisteredRiders();
+
+		//for (int id : riderIds) {
+			for (LocalTime time : rider_results) {
+
+				if (pointsDistributionChoice.equals("Sprint")) {
+
+					switch (type) {
+						case FLAT:
+							stage.addToRiderPoints(index, flat[index]);
+
+						case MEDIUM_MOUNTAIN:
+							stage.addToRiderPoints(index, medium_mountain[index]);
+
+						case HIGH_MOUNTAIN:
+							stage.addToRiderPoints(index, high_mountain[index]);
+
+						case TT:
+							stage.addToRiderPoints(index, time_trial[index]);
+
+					}
+
+					for (SegmentType segment : segments) {
+						if (segment == SegmentType.valueOf("SPRINT")) {
+							LocalTime [] times = stage.getRidersResults(riderId);
+
+							LocalTime sprint_time = times[segments.indexOf(SegmentType.valueOf("SPRINT"))+1];
+//NOW I HAVE TO COMPARE THESE TIMES WITH THE OTHERS, AS THEY MAY HAVE FINISHED THE SPECIFC SEGMENT IN A LOWER TIME
+
+						}
+					}
+
+				}
+
+				else if (pointsDistributionChoice.equals("GC")) {
+
+				}
+
+				else if (pointsDistributionChoice.equals("Mountain")) {
+
+				}
+
+				else {
+					// add exception
+				}
+			}
+		//}
 	}
 
 	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
@@ -309,13 +408,23 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 			a = b;
 			b = Stages.stages_hashmap.get(stageId).getNextElapsedTimeInArray(++index);
-			// SO if index 2 to 13 have consecutive <1 seconds diff, they will take the
-			// value of index 2,
-			// but if then theres another consecutive pattern from index 23 to 30, what
-			// happens?
 		}
+
 		// HOW DOES THIS MAKE SENSE, IT COULD TECHNICALLY ALSO BE ONE HOUR AHEAD, BUT
 		// BEHIND BY A FEW NANOSECONDS??
+	}
+
+	public void calculateRidersPointsInStage(int riderId) {
+		// can be used recursively in calculating points of all riders in stage, and
+		// points in race.
+	}
+
+	public void calculateSprinterClassPointsOfRider(int riderId) {
+
+	}
+
+	public void calculateMountClassPointsOfRider(int riderId) {
+
 	}
 
 }
