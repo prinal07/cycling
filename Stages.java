@@ -3,13 +3,17 @@ package cycling;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.spi.ToolProvider;
 
+import javax.print.attribute.standard.Copies;
 import javax.swing.text.Segment;
 
-public class Stages {
+public class Stages implements Comparable<Stages> {
     private StageType stage_type;
     private String stage_name;
     private int stage_length;
@@ -23,18 +27,25 @@ public class Stages {
     private LocalDateTime startTime;
     private int registeredRiders = 0;
     private Boolean resultsExist = false;
-    //could use this...
+    // could use this...
 
     private HashMap<Integer, LocalTime[]> stages_results = new HashMap<>(); // key: riderId, value: checkpoint array
     private ArrayList<Integer> sortedRiderIds = new ArrayList<>();
     private ArrayList<LocalTime[]> sortedElapsedRiderResults = new ArrayList<>();
-    private ArrayList<LocalTime> adjustedElapsedTimes = new ArrayList<>(); 
+    private ArrayList<LocalTime> adjustedElapsedTimes = new ArrayList<>();
 
-    private ArrayList<Integer> ridersPoints = new ArrayList<>(); //uses the sortedRiderIds as reference for order of entry. 
+    private ArrayList<Integer> ridersPoints = new ArrayList<>(); // uses the sortedRiderIds as reference for order of
+                                                                 // entry.
 
-    //uses the sortedRiderIds to add corresponding values, 
-    //hence the swapSortElapsedTimes must be executed before this can be used.
-  
+    // private ArrayList<Integer> positionByIntermediateSprint = new ArrayList<>();
+    // private ArrayList<Integer> positionByC4 = new ArrayList<>();
+    // private ArrayList<Integer> positionByC3 = new ArrayList<>();
+    // private ArrayList<Integer> positionByC2 = new ArrayList<>();
+    // private ArrayList<Integer> positionByC1 = new ArrayList<>();
+
+    // uses the sortedRiderIds to add corresponding values,
+    // hence the swapSortElapsedTimes must be executed before this can be used.
+
     private int segments_in_stage = 0;
     public static int segment_counter = 0; // Total segments in entirety.
     public static HashMap<Integer, Stages> stages_hashmap;
@@ -44,7 +55,8 @@ public class Stages {
     private ArrayList<Integer> stage_private_segments = new ArrayList<>();
     private ArrayList<SegmentType> segment_values;
 
-    public Stages(String stageName, String description, double length, LocalDateTime startTime, int raceId, StageType type) {
+    public Stages(String stageName, String description, double length, LocalDateTime startTime, int raceId,
+            StageType type) {
         this.stage_name = stageName;
         this.description = description;
         this.length = length;
@@ -57,17 +69,20 @@ public class Stages {
         this.stageId = stageId;
     }
 
-    public int getRaceId(){
+    public int getRaceId() {
         return this.raceId;
     }
-    public void setResultsExistsBoolean(){
-        //HAVENT USED THIS YET...
+
+    public void setResultsExistsBoolean() {
+        // HAVENT USED THIS YET...
         this.resultsExist = true;
-        //NEED TO MAKE THIS FALSE IN ANY METHOD WHERE RESULTS ARE REMOVED, CHECK IF RESULTS ARE EMPTY FIRST
-        //21/03/22 - 14:19 --> havent decremented the total number of registered riders anywhere yet, need to do this, this will be used to checkt the above.
+        // NEED TO MAKE THIS FALSE IN ANY METHOD WHERE RESULTS ARE REMOVED, CHECK IF
+        // RESULTS ARE EMPTY FIRST
+        // 21/03/22 - 14:19 --> havent decremented the total number of registered riders
+        // anywhere yet, need to do this, this will be used to checkt the above.
     }
 
-    public StageType getStageType(){
+    public StageType getStageType() {
         return this.stage_type;
     }
 
@@ -76,6 +91,7 @@ public class Stages {
         this.sortedRiderIds.add(index, riderId);
         this.adjustedElapsedTimes.add(index, LocalTime.of(00, 00, 00));
         this.ridersPoints.add(0);
+
     }
 
     public LocalTime getLastElapsedTimeInArray(int index) {
@@ -83,17 +99,17 @@ public class Stages {
         return array[array.length - 1];
     }
 
-    public LocalTime getElapsedTimeInArray(int index){
+    public LocalTime getElapsedTimeInArray(int index) {
         LocalTime[] array = this.sortedElapsedRiderResults.get(index);
         return array[array.length - 1];
     }
 
-    public LocalTime getNextElapsedTimeInArray(int index){
-        LocalTime[] array = this.sortedElapsedRiderResults.get(index+1);
+    public LocalTime getNextElapsedTimeInArray(int index) {
+        LocalTime[] array = this.sortedElapsedRiderResults.get(index + 1);
         return array[array.length - 1];
     }
 
-    public void setValueInAdjustedTimeArray(int index, LocalTime time){
+    public void setValueInAdjustedTimeArray(int index, LocalTime time) {
         this.adjustedElapsedTimes.set(index, time);
     }
 
@@ -104,14 +120,14 @@ public class Stages {
 
             sortedElapsedRiderResults.set(lastPos, temp_current_results);
             sortedRiderIds.set(lastPos, temp_current);
-            //check whether this logic requires .set or .add
+            // check whether this logic requires .set or .add
 
             currentElapsedTime = prevTime;
 
             try {
                 prevTime = getLastElapsedTimeInArray(currentPos);
             } catch (IndexOutOfBoundsException e) {
-                //is this correct?
+                // is this correct?
                 break;
             }
         }
@@ -143,8 +159,8 @@ public class Stages {
     public SegmentType getSegmentValue(int segmentId) {
         return (segment_values.get(stage_private_segments.indexOf(segmentId)));
     }
-    
-    public ArrayList<SegmentType> getAllSegmentValues(){
+
+    public ArrayList<SegmentType> getAllSegmentValues() {
         return (segment_values);
     }
 
@@ -160,9 +176,10 @@ public class Stages {
 
     public void addResultsToStage(int riderId, LocalTime... checkpoints) {
         stages_results.put(riderId, checkpoints);
-        registeredRiders ++;
+        registeredRiders++;
     }
-    //do i need this? elapsedsortedarrays are enough? check registerRiderResultsInStage
+    // do i need this? elapsedsortedarrays are enough? check
+    // registerRiderResultsInStage
 
     public LocalTime[] getRidersResults(int riderId) {
         return stages_results.get(riderId);
@@ -187,38 +204,66 @@ public class Stages {
         return (listOfValues);
     }
 
-    public int getIndexOfSortedRiderId(int riderId){
+    public int getIndexOfSortedRiderId(int riderId) {
         return this.sortedRiderIds.indexOf(riderId);
     }
 
-    public LocalTime getRiderAdjElapsedTime(int index){
+    public LocalTime getRiderAdjElapsedTime(int index) {
         return this.adjustedElapsedTimes.get(index);
     }
 
-    public int[] getRidersRankList(){
+    public int[] getRidersRankList() {
         int[] rankedIdList = sortedRiderIds.stream().mapToInt(Integer::intValue).toArray();
         return rankedIdList;
     }
 
-    public LocalTime[] getRidersRankedAdjustedList(){
-        LocalTime[] rankedAdjList = adjustedElapsedTimes.toArray(new LocalTime[]{});
+    public LocalTime[] getRidersRankedAdjustedList() {
+        LocalTime[] rankedAdjList = adjustedElapsedTimes.toArray(new LocalTime[] {});
         return rankedAdjList;
     }
 
-    public void addToRiderPoints(int index, int points){
+    public void addToRiderPoints(int index, int points) {
         this.ridersPoints.set(index, points);
     }
 
-    public int getIndexInSortedArrays(int riderId){
+    public int getIndexInSortedArrays(int riderId) {
         return sortedRiderIds.indexOf(riderId);
     }
 
-    public LocalTime[] getRidersSortedResultsOfRider(int index){
-        return(this.sortedElapsedRiderResults.get(index));
-    } 
+    public LocalTime[] getRidersSortedResultsOfRider(int index) {
+        return (this.sortedElapsedRiderResults.get(index));
+    }
 
-    public Boolean intermediateSprintExists(){
+    public int searchSpecificSegmentAndSort(SegmentType type) {
+
+        if (segment_values.contains(type) == true) {
+            int index = segment_values.indexOf(type);
+            int counter = 0;
+                for (int rider : sortedRiderIds) {
+                    LocalTime[] checkpoint = stages_results.get(rider);
+                    LocalTime[] copy = Arrays.copyOf(checkpoint, checkpoint.length);
+                    LocalTime current = copy[index + 1];
+                    index++;
+
+                    for (int i = counter + 1; i < sortedRiderIds.size() - 1; i++) {
+                        LocalTime next = copy[i];
+                        if (next.isBefore(current)) {
+                            next = copy[index + 1];
+                            current = next;
+                        }
+                    }
+
+                }
+
+
+        }
+
+    }
+
+    @Override
+    public int compareTo(Stages stage) {
         
+        return 0;
     }
 
 }

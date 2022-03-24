@@ -302,6 +302,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		ArrayList<SegmentType> segments = stage.getAllSegmentValues();
 		StageType type = stage.getStageType();
 		int registeredRiderCtr = stage.getNumberOfRegisteredRiders();
+		
 
 		//for (int id : riderIds) {
 			for (LocalTime time : rider_results) {

@@ -1,6 +1,7 @@
 package cycling;
 
 import java.lang.String;
+import java.time.LocalTime;
 
 public class Riders{   //I changed it from Teams extending Riders, to Riders extends Teams
     private int teamID;
@@ -8,6 +9,7 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
     private String name;
     public static int total_riders = 0;
     private int riderId;
+    private LocalTime[] riderResults; 
     //private java.time.LocalTime adjustedElapsedTimeInStage;
     //there are many stages that 1 rider participates in.
 
