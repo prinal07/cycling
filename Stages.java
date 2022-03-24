@@ -13,7 +13,7 @@ import java.util.spi.ToolProvider;
 import javax.print.attribute.standard.Copies;
 import javax.swing.text.Segment;
 
-public class Stages implements Comparable<Stages> {
+public class Stages {
     private StageType stage_type;
     private String stage_name;
     private int stage_length;
@@ -258,12 +258,6 @@ public class Stages implements Comparable<Stages> {
 
         }
 
-    }
-
-    @Override
-    public int compareTo(Stages stage) {
-        
-        return 0;
     }
 
 }
