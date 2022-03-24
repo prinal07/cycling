@@ -20,7 +20,9 @@ public class Stages {
     private int stageId;
     private int raceId;
     private String description;
-    private String stage_state;
+    private String stage_state = "";
+    //SEGMENT: Contains segments.
+    //RESULTS: Results exist.
     public static int total_stages = 0;
     private Double location;
     private double length;
@@ -33,15 +35,14 @@ public class Stages {
     private ArrayList<Integer> sortedRiderIds = new ArrayList<>();
     private ArrayList<LocalTime[]> sortedElapsedRiderResults = new ArrayList<>();
     private ArrayList<LocalTime> adjustedElapsedTimes = new ArrayList<>();
+    private double tempSegmentLengthTotal = 0;
 
     private ArrayList<Integer> ridersPoints = new ArrayList<>(); // uses the sortedRiderIds as reference for order of
                                                                  // entry.
 
-    // private ArrayList<Integer> positionByIntermediateSprint = new ArrayList<>();
-    // private ArrayList<Integer> positionByC4 = new ArrayList<>();
-    // private ArrayList<Integer> positionByC3 = new ArrayList<>();
-    // private ArrayList<Integer> positionByC2 = new ArrayList<>();
-    // private ArrayList<Integer> positionByC1 = new ArrayList<>();
+    private ArrayList<ArrayList<Integer>> sortedRiderIdsBySegment = new ArrayList<>();
+    // index 0: ArrayList of sorted Riders Ids by Sprint Segment
+    // index
 
     // uses the sortedRiderIds to add corresponding values,
     // hence the swapSortElapsedTimes must be executed before this can be used.
@@ -69,6 +70,18 @@ public class Stages {
         this.stageId = stageId;
     }
 
+    public boolean containsResults(int riderId){
+        return this.stages_results.containsKey(riderId);
+    }
+
+    public void addToSegmentLengthTotal(double length){
+        this.tempSegmentLengthTotal = tempSegmentLengthTotal + length;
+    }
+
+    public double getSegmentTotalLength(){
+        return this.tempSegmentLengthTotal;
+    }
+
     public int getRaceId() {
         return this.raceId;
     }
@@ -84,6 +97,10 @@ public class Stages {
 
     public StageType getStageType() {
         return this.stage_type;
+    }
+
+    public double getStageLength(){
+        return this.length;
     }
 
     public void addToElapsedSortedArrays(int index, int riderId, LocalTime[] checkpoints) {
@@ -131,6 +148,14 @@ public class Stages {
                 break;
             }
         }
+    }
+
+    public void setState(String state){
+        this.stage_state = state;
+    }
+
+    public String getState(){
+        return this.stage_state;
     }
 
     public int[] getStageSegments() {
@@ -223,7 +248,13 @@ public class Stages {
     }
 
     public void addToRiderPoints(int index, int points) {
-        this.ridersPoints.set(index, points);
+        int oldPoints = this.ridersPoints.get(index);
+        this.ridersPoints.set(index, oldPoints + points);
+    }
+
+    public int[] getRidersPoints(){
+        int[] riders_points = this.ridersPoints.stream().mapToInt(Integer::intValue).toArray();
+        return riders_points;
     }
 
     public int getIndexInSortedArrays(int riderId) {
@@ -234,30 +265,58 @@ public class Stages {
         return (this.sortedElapsedRiderResults.get(index));
     }
 
-    public int searchSpecificSegmentAndSort(SegmentType type) {
+    public void searchSpecificSegmentAndSort(SegmentType type, int typeIndex) {
+        this.sortedRiderIdsBySegment.add(typeIndex, sortedRiderIds);
 
         if (segment_values.contains(type) == true) {
             int index = segment_values.indexOf(type);
-            int counter = 0;
-                for (int rider : sortedRiderIds) {
-                    LocalTime[] checkpoint = stages_results.get(rider);
-                    LocalTime[] copy = Arrays.copyOf(checkpoint, checkpoint.length);
-                    LocalTime current = copy[index + 1];
-                    index++;
 
-                    for (int i = counter + 1; i < sortedRiderIds.size() - 1; i++) {
-                        LocalTime next = copy[i];
-                        if (next.isBefore(current)) {
-                            next = copy[index + 1];
-                            current = next;
-                        }
+            ArrayList<Integer> list = new ArrayList<>();
+            list.addAll(sortedRiderIdsBySegment.get(typeIndex));
+
+            for (int riderIndex1 = 0; riderIndex1 < sortedRiderIds.size(); riderIndex1++) {
+                LocalTime[] checkpoint1 = stages_results.get(sortedRiderIds.get(riderIndex1));
+                LocalTime segmentTime = checkpoint1[index + 1];
+
+                for (int riderIndex2 = 1; riderIndex2 < sortedRiderIds.size() - 1; riderIndex2++) {
+                    LocalTime[] checkpoint2 = stages_results.get(sortedRiderIds.get(riderIndex2));
+                    LocalTime segmentTime2 = checkpoint2[index + 1];
+
+                    if (segmentTime2.isBefore(segmentTime)) {
+                        list.set(riderIndex1, sortedRiderIds.get(riderIndex2));
+                        list.set(riderIndex2, sortedRiderIds.get(riderIndex1));
+                    }
+
+                    else {
+                        list.set(riderIndex1, sortedRiderIds.get(riderIndex1));
+                        list.set(riderIndex2, sortedRiderIds.get(riderIndex2));
                     }
 
                 }
+
+            }
+            this.sortedRiderIdsBySegment.set(typeIndex, list);
 
 
         }
 
     }
 
+    public int getSortedRiderIndexBySegment(int typeIndex, int riderId){
+        ArrayList<Integer> temp_arraylist = this.sortedRiderIdsBySegment.get(typeIndex);
+        return temp_arraylist.indexOf(riderId);
+    }
+
+    public String getStageName(){
+        return this.stage_name;
+    }
+    
+    public int getStageId(){
+        return this.stageId;
+    }
+
+
+    
+    
 }
+

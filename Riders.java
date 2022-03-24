@@ -2,6 +2,8 @@ package cycling;
 
 import java.lang.String;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Riders{   //I changed it from Teams extending Riders, to Riders extends Teams
     private int teamID;
@@ -12,6 +14,9 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
     private LocalTime[] riderResults; 
     //private java.time.LocalTime adjustedElapsedTimeInStage;
     //there are many stages that 1 rider participates in.
+    public static ArrayList<Integer> allRidersIds = new ArrayList<>();
+    public static HashMap<Integer, Riders> riders_hashmap = new HashMap<>();
+
 
     public int createRider(int teamID, String name, int yearOfBirth){
         this.name = name;
@@ -21,6 +26,7 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
 
         Teams team = new Teams();          
         team.addRider(riderId, teamID);
+    
 
         return(riderId);
     }

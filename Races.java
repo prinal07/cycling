@@ -19,6 +19,10 @@ public class Races {
     public Races(){
     }
 
+    public String getName(){
+        return this.name;
+    }
+
     public Races(String name, String description){
         this.name = name;
         this.description = description;
@@ -53,6 +57,17 @@ public class Races {
     public static void sortRaceStages(int raceId, LocalDateTime[]array){
 		Arrays.sort(array);
 		}
+
+    public String getDescription(){
+        return this.description;
+    }
+
+    public String getTotalLength(){
+        int local_total = 0;
+        for (int x = 0; x<stageIdArray.length; x++){
+            local_total = local_total + Stages.stages_hashmap.get(stageIdArray[x]).getStageLength();
+        }
+    }
 
 }
 

@@ -55,7 +55,11 @@ public class Teams {
     }
 
     public void remove(int riderId){
+///////COMPLETEEEEEE THISSSSSSS
+    }
 
+    public String getName(){
+        return this.name;
     }
 
 }
