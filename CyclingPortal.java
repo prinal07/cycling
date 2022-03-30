@@ -1,12 +1,16 @@
 package cycling;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.annotation.AnnotationTypeMismatchException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.management.InvalidApplicationException;
+import java.util.HashMap;
 
 public class CyclingPortal implements CyclingPortalInterface {
 
@@ -23,37 +27,55 @@ public class CyclingPortal implements CyclingPortalInterface {
 	public static int[] HC = { 20, 15, 12, 10, 8, 6, 4, 2 };
 
 	public int[] getRaceIds() {
-		return null;
+		if (Races.total_races == 0) {
+			int[] empty = new int[1];
+			return empty;
+		} else {
+			return Races.getRaceIds();
+		}
 	}
 
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
-		if (name == null || name.length() > 30 || name.equals("") || name.contain(" ")) {
+		// This if statement checks if the name is null, empty, has more than 30
+		// characters or has any whitespaces.
+		if (name == null || name.length() > 30 || name.equals("") || name.contains(" ")) {
 			throw new InvalidNameException(
+					// Throws an InvalidNameException if the conditions are met.
 					"The name can't be null, empty, be more than 30 characters long or have whitespaces in it");
 		}
 
-		Collection<Races> raceObjects = Races.races_hashmap.values();
-		for (Races obj : raceObjects) {
-			if (obj.getName().equals(name)) {
-				throw new IllegalNameException("This name already exists in the platform");
-				break;
+		// This statement checks if the name already exists in the platform.
+		// Only thrown if the total number of races is more than 0.
+		if (Races.total_races > 0) {
+			Collection<Races> raceObjects = Races.races_hashmap.values();
+			for (Races obj : raceObjects) {
+				if (obj.getName().equals(name)) {
+					// Throws an IllegalNameException if the name conditions are met.
+					throw new IllegalNameException("This name already exists in the platform");
+				}
 			}
+
 		}
 
+		// Creates a new race
 		Races race = new Races(name, description);
 		int local_total_races = Races.total_races++;
 		int local_race_id = local_total_races * 10;
 		race.setRaceId(local_race_id);
+		// Stores the raceId in the hashmap
 		Races.races_hashmap.put(local_race_id, race);
 
+		// Returns the raceId
 		return (local_race_id);
 	}
 
 	public String viewRaceDetails(int raceId) throws IDNotRecognisedException {
 
+		// Checks if the raceId matches to any in the system.
 		Collection<Races> raceObjects = Races.races_hashmap.values();
 		for (Races obj : raceObjects) {
 			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
 				throw new IDNotRecognisedException("This raceId is not found");
 			}
 		}
@@ -71,18 +93,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public void removeRaceById(int raceId) throws IDNotRecognisedException {
+
+		// This method loops throug the races hashmap to check if the raceID is in the
+		// system
 		Collection<Races> raceObjects = Races.races_hashmap.values();
 		for (Races obj : raceObjects) {
 			if (obj.getRaceId() == (raceId)) {
+				// If the condtions are met then an IDNotRecognisedException is thrown
 				throw new IDNotRecognisedException("This raceId is not found");
 			}
 		}
 	}
 
 	public int getNumberOfStages(int raceId) throws IDNotRecognisedException {
+
+		// This method loops throug the races hashmap to check if the raceID is in the
+		// system
 		Collection<Races> raceObjects = Races.races_hashmap.values();
 		for (Races obj : raceObjects) {
 			if (obj.getRaceId() == (raceId)) {
+				// If the condtions are met then an IDNotRecognisedException is thrown
 				throw new IDNotRecognisedException("This raceId is not found");
 			}
 		}
@@ -95,31 +125,40 @@ public class CyclingPortal implements CyclingPortalInterface {
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
 
+		// This if statement checks if the name is null, empty, has more than 30
+		// characters or has any whitespaces.
 		if (stageName == null || stageName.length() > 30 || stageName.equals("") || stageName.contains(" ")) {
+			// Throws an InvalidNameException if the conditions are met.
 			throw new InvalidNameException(
 					"The name can't be null, empty, be more than 30 characters long or have whitespaces in it");
 		}
 
+		// Checks if the length is less than 5km.
 		if (length < 5) {
+			// Thrown an InvalidLengthException if true
 			throw new InvalidLengthException("The Length has to be longer than 5km");
 		}
 
+		// Checks if the raceId matches to any in the system.
 		Collection<Races> raceObjects = Races.races_hashmap.values();
 		for (Races obj : raceObjects) {
 			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
 				throw new IDNotRecognisedException("This raceId is not found");
 			}
 		}
 
+		// Checks if the sstageName is already in the system.
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageName().equals(stageName)) {
+				// If conditions are met then IllegalNameException is thrown
 				throw new IllegalNameException("This Stage Name is not found");
 			}
 		}
 
 		Stages stage = new Stages(stageName, description, length, startTime, raceId, type);
-		int local_total_stages = Stages.total_stages;
+		int local_total_stages = Stages.total_stages++;
 		int temp_stage_id = local_total_stages * 2;
 		stage.setStageId(temp_stage_id);
 
@@ -131,22 +170,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
 
+		// Checks if the raceId matches to any in the system.
 		Collection<Races> raceObjects = Races.races_hashmap.values();
 		for (Races obj : raceObjects) {
 			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
 				throw new IDNotRecognisedException("This raceId is not found");
 			}
 		}
+		int[] stages_ids = Races.races_hashmap.get(raceId).getStageIds();
 
-		int[] stages_ids = Races.races_hashmap.get(raceId).getStagesIds();
 		return stages_ids;
 	}
 
 	public double getStageLength(int stageId) throws IDNotRecognisedException {
 
+		// Checks if the stageId is stages_hashmap
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageId() == (stageId)) {
+				// If the conditions are met then IDNotRecognised is thrown
 				throw new IDNotRecognisedException("This Stage ID is not found");
 			}
 		}
@@ -156,71 +199,102 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	public void removeStageById(int stageId) throws IDNotRecognisedException {
 
+		// Checks if the stageId is stages_hashmap
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageId() == (stageId)) {
+				// If the conditions are met then IDNotRecognised is thrown
 				throw new IDNotRecognisedException("This Stage ID is not found");
 			}
 		}
+
+		Stages.stages_hashmap.get(stageId).deleteStage(stageId);
 	}
 
 	public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
 			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
 			InvalidStageTypeException {
 
+		// Checks if the stageId is in stages_hashmap
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageId() == (stageId)) {
+				// If the conditions are met then IDNotRecognised is thrown
 				throw new IDNotRecognisedException("This Stage ID is not found");
 			}
 		}
 
 		String state = Stages.stages_hashmap.get(stageId).getState();
-		if (state.equals("RESULTS")) {
+		// Checks if the stage is able to perform an action in its current state
+		if (state.equals("RESULTS") || state != ("waiting for results")) {
 		}
 
 		else {
+			// If not incompatible then an InvalidStageStateException is thrown
 			throw new InvalidStageStateException("Results not yet added.");
 		}
 
+		// Checks if the the location thats being assigned is outside the bounds of the
+		// stage
 		if ((Stages.stages_hashmap.get(stageId).getSegmentTotalLength() + location) > Stages.stages_hashmap.get(stageId)
 				.getLength()) {
+			// If conditions are met then an InvalidLocationException is thrown
 			throw new InvalidLocationException("Location of segment is out of bounds of the stage.");
 		}
 
+		// Checks if the stage type is a time trial that contains segments
 		if (Stages.stages_hashmap.get(stageId).getStageType() == StageType.TT) {
+			// If conditions are met then the InvalidStageTypeException is thrown
 			throw new InvalidStageTypeException("Cannot add segments to a time-trial stage");
 		}
 
 		Stages.stages_hashmap.get(stageId).addToSegmentLengthTotal(length);
 		Stages.stages_hashmap.get(stageId).setState("SEGMENTS");
 
-		return 0;
+		Stages stage = Stages.stages_hashmap.get(stageId);
+		int temp_segment_id = (Stages.segment_counter) * 2;
+
+		stage.addSegmentIdAndValue(temp_segment_id, type);
+		Stages.addSegmentToHashMap(stageId, temp_segment_id);
+		stage.addToSegmentLengthTotal(length);
+		stage.setState("SEGMENTS");
+
+		return temp_segment_id;
 	}
 
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
+
+		// Checks if the stageId is in stages_hashmap
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageId() == (stageId)) {
+				// If the condtions are met then IDNotRecognisedException is thrown
 				throw new IDNotRecognisedException("This Stage ID is not found");
 			}
 		}
 
 		String state = Stages.stages_hashmap.get(stageId).getState();
-		if (state.equals("RESULTS")) {
+		// Checks if the stage is able to perform an action in its current state
+		if (state.equals("RESULTS") || state != ("waiting for results")) {
 		}
 
 		else {
+			// If not incompatible then an InvalidStageStateException is thrown
 			throw new InvalidStageStateException("Results not yet added.");
 		}
 
+		// Checks if the the location thats being assigned is outside the bounds of the
+		// stage
 		if ((Stages.stages_hashmap.get(stageId).getSegmentTotalLength() + location) > Stages.stages_hashmap.get(stageId)
 				.getLength()) {
+			// If conditions are met then an InvalidLocationException is thrown
 			throw new InvalidLocationException("Location of segment is out of bounds of the stage.");
 		}
 
+		// Checks if the stage type is a time trial that contains segments
 		if (Stages.stages_hashmap.get(stageId).getStageType() == StageType.TT) {
+			// If conditions are met then the InvalidStageTypeException is thrown
 			throw new InvalidStageTypeException("Cannot add segments to a time-trial stage");
 		}
 		Stages stage = Stages.stages_hashmap.get(stageId);
@@ -235,12 +309,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
 
+		// checks if the segmentId is in the system
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		int localCtr = 0;
 		for (Stages obj : stageObject) {
 			int[] ids = obj.getStageSegments();
 			for (int id : ids) {
 				if (id != (segmentId)) {
+					// If the conditions are met then IDNotRecognisedException is thrown
 					throw new IDNotRecognisedException("This Segment ID is not found in the system");
 				}
 			}
@@ -249,10 +325,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 		int stageId = Stages.segment_and_stage_ids.get(segmentId);
 		String state = Stages.stages_hashmap.get(stageId).getState();
 
-		if (state.equals("RESULTS")) {
+		// Checks if the stage is able to perform an action in its current state
+		if (state.equals("RESULTS") || state != ("waiting for results")) {
 		}
 
 		else {
+			// If not incompatible then an InvalidStageStateException is thrown
 			throw new InvalidStageStateException("Results not yet added.");
 		}
 
@@ -261,6 +339,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public void concludeStagePreparation(int stageId) throws IDNotRecognisedException, InvalidStageStateException {
+
+		// Checks if the stageId is in stages_hashmap
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageId() == (stageId)) {
@@ -269,12 +349,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		String state = Stages.stages_hashmap.get(stageId).getState();
-		if (state.equals("RESULTS")) {
+		// Checks if the stage is able to perform an action in its current state
+		if (state.equals("RESULTS") || state != ("waiting for results")) {
 		}
 
 		else {
+			// If not incompatible then an InvalidStageStateException is thrown
 			throw new InvalidStageStateException("Results not yet added.");
 		}
+
+		Stages.stages_hashmap.get(stageId).setState("waiting for results");
 
 	}
 
@@ -291,15 +375,19 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
-		Collection<Teams> objects = Teams.teamsHashMap.values();
-		for (Teams obj : objects) {
+
+		Collection<Teams> teamObjects = Teams.teamsHashMap.values();
+		for (Teams obj : teamObjects) {
 			if (obj.getName().equals(name)) {
-				throw new IllegalNameException("This name already exists in the platform");
+				// If conditions are met then IllegalNameException is thrown
+				throw new IllegalNameException("Team with this Team Name already exists!");
 			}
 		}
-
+		// This if statement checks if the name is null, empty, has more than 30
+		// characters or has any whitespaces.
 		if (name == null || name.length() > 30 || name.equals("") || name.contains(" ")) {
 			throw new InvalidNameException(
+					// Throws an InvalidNameException if the conditions are met.
 					"The name can't be null, empty, be more than 30 characters long or have whitespaces in it");
 		}
 
@@ -315,12 +403,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public void removeTeam(int teamId) throws IDNotRecognisedException {
+		// Checks if the id matches any id in the system.
 		Collection<Teams> teamobject = Teams.teamsHashMap.values();
 		for (Teams obj : teamobject) {
 			if (obj.getTeamId() == (teamId)) {
+				// If the conditions are met then IDNotRecognisedException is thrown.
 				throw new IDNotRecognisedException("The ID does not match to any team in the system");
 			}
 		}
+
+		Teams.remove(teamId);
+
 	}
 
 	public int[] getTeams() {
@@ -328,9 +421,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
+
+		// Checks if the id matches to any id in the system
 		Collection<Teams> teamobject = Teams.teamsHashMap.values();
 		for (Teams obj : teamobject) {
 			if (obj.getTeamId() == (teamId)) {
+				// If conditions are met then IDNotRecognisedException is thrown.
 				throw new IDNotRecognisedException("The ID does not match to any team in the system");
 			}
 		}
@@ -342,14 +438,18 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	public int createRider(int teamID, String name, int yearOfBirth)
 			throws IDNotRecognisedException, IllegalArgumentException {
+		// Checks if the id mathces to any id in the system.
 		Collection<Teams> teamobject = Teams.teamsHashMap.values();
 		for (Teams obj : teamobject) {
 			if (obj.getTeamId() == (teamID)) {
+				// If the conditions are met then IDNotRecognisedException is thrown
 				throw new IDNotRecognisedException("The ID does not match to any team in the system");
 			}
 		}
 
+		// Checks if the name of the rider is null and if the year of birth is less than
 		if (name == null || yearOfBirth < 1900) {
+			// If conditions are met then IllegalArgumentException is thrown
 			throw new IllegalArgumentException(
 					"Name cannot be null and year of birth cannot be less than 1900. #retire");
 		}
@@ -363,39 +463,62 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		Riders.allRidersIds.add(local_rider_id);
 		Riders.riders_hashmap.put(local_rider_id, rider);
-		// Teams.teamsHashMap.get(teamID).getRiderIdList();
 		return local_rider_id;
 
 	}
 
 	public void removeRider(int riderId) throws IDNotRecognisedException {
+		// Checks if the riderId mathces to any rider in the system
 		ArrayList<Integer> riderIds = Riders.allRidersIds;
 		if (riderIds.contains(riderId) == false) {
+			// If false then IDNotRecognisedException is thrown.
 			throw new IDNotRecognisedException("The ID does not match to any rider in the system");
 		}
+
+		Riders.removeRider(riderId);
+
 	}
 
-	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints) throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException, InvalidStageStateException {
+	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
+			throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
+			InvalidStageStateException {
+		// Checks if the id matches to any stage in the system
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
 		for (Stages obj : stageObject) {
 			if (obj.getStageId() == (stageId)) {
+				// If no match is found the an IDNotRecognisedException is thrown
 				throw new IDNotRecognisedException("This Stage ID is not found");
 			}
 		}
 
-		if (Stages.stages_hashmap.get(stageId).containsResults(riderId) == false){
+		// Checks if the riderId matches to any rider in the list
+		ArrayList<Integer> riderIds = Riders.allRidersIds;
+		if (riderIds.contains(riderId) == false) {
+			// If condition is met then IDNotRecognisedException is thrown
+			throw new IDNotRecognisedException("The ID does not match to any rider in the system");
+		}
+
+		// Checks if the rider already has a result for the stage
+		if (Stages.stages_hashmap.get(stageId).containsResults(riderId) == false) {
+			// If the rider does have a result then DuplicatedResultException is thrown.
 			throw new DuplicatedResultException("Riders results already exists.");
 		}
 
-		if (checkpoints.length != Stages.stages_hashmap.get(stageId).getTotalSegmentsInStage() + 2){
-			throw new InvalidCheckpointsException("Each race result should contain the times for each segment within a stage, along with the start and finish time.");
+		// Checks if the lengths of the checkpoints is not equal to the number of
+		// segments in the stage + 2
+		if (checkpoints.length != Stages.stages_hashmap.get(stageId).getTotalSegmentsInStage() + 2) {
+			// If the conditions are met then InvalidCheckpointException is thrown
+			throw new InvalidCheckpointsException(
+					"Each race result should contain the times for each segment within a stage, along with the start and finish time.");
 		}
 
 		String state = Stages.stages_hashmap.get(stageId).getState();
-		if (state.equals("RESULTS")) {
+		// Checks if the stage is able to perform an action in its current state
+		if (state.equals("RESULTS") || state != ("waiting for results")) {
 		}
 
 		else {
+			// If not incompatible then an InvalidStageStateException is thrown
 			throw new InvalidStageStateException("Results not yet added.");
 		}
 
@@ -413,7 +536,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 		LocalTime elapsedTime = LocalTime.of(Integer.parseInt(hour), Integer.parseInt(minute),
 				Integer.parseInt(seconds), Integer.parseInt(nanoOfSecond));
 
-		checkpoints[checkpoints.length] = elapsedTime;
+		LocalTime[] checkpoints_copy = new LocalTime[checkpoints.length + 1];
+		checkpoints_copy[checkpoints.length] = elapsedTime;
+
+		stage.updateResults(riderId, checkpoints, checkpoints_copy);
 		// check if any of this logic works...
 
 		int index = stage.getNumberOfRegisteredRiders();
@@ -432,10 +558,22 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 	}
 
-	// remeber to decrement numberOfRegisteredRiders in the removeRiders(in
-	// removerider)??, removeResults, and more (maybe, think)...
-
 	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
+		// Checks if the id matches any of the riders in the system
+		ArrayList<Integer> riderIds = Riders.allRidersIds;
+		if (riderIds.contains(riderId) == false) {
+			// If conditions are met then IDNotRecognisedException is thrown
+			throw new IDNotRecognisedException("The ID does not match to any rider in the system");
+		}
+
+		// Checks if the id mathces any of the riders in the system
+		Collection<Stages> stageObject = Stages.stages_hashmap.values();
+		for (Stages obj : stageObject) {
+			if (obj.getStageId() == (stageId)) {
+				// If the Id does not match then IDNotRecognisedException is thrown
+				throw new IDNotRecognisedException("This Stage ID is not found");
+			}
+		}
 		LocalTime[] results = Stages.stages_hashmap.get(stageId)
 				.getRidersResults(riderId);
 
@@ -450,28 +588,70 @@ public class CyclingPortal implements CyclingPortalInterface {
 					Integer.parseInt(seconds), Integer.parseInt(nanoOfSecond));
 
 			results[results.length] = elapsedTime;
-			// check if any of this logic works...
 		} else {
 			LocalTime[] emptyArray = new LocalTime[0];
 			return emptyArray;
 		}
-		// Return an empty array if there is no result registered for the rider in the
-		// stage. //need to add some state attribute to check for this
 		return results;
 	}
 
 	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
-		calculateAdjustedElapsedTimes(0, stageId);
-		int index = Stages.stages_hashmap.get(stageId).getIndexOfSortedRiderId(riderId);
-		LocalTime time = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(index);
-		return time;
+		// Checks if the id matches any of the riders in the system
+		if (Stages.stages_hashmap.get(stageId).containsResults(riderId) == true) {
+			Collection<Stages> stageObject = Stages.stages_hashmap.values();
+			for (Stages obj : stageObject) {
+				if (obj.getStageId() == (stageId)) {
+					// If the Id does not match then IDNotRecognisedException is thrown
+					throw new IDNotRecognisedException("This Stage ID is not found");
+				}
+			}
+
+			// Checks if the id matches any of the riders in the system
+			ArrayList<Integer> riderIds = Riders.allRidersIds;
+			if (riderIds.contains(riderId) == false) {
+				// If conditions are met then IDNotRecognisedException is thrown
+				throw new IDNotRecognisedException("The ID does not match to any rider in the system");
+			}
+			calculateAdjustedElapsedTimes(0, stageId);
+			int index = Stages.stages_hashmap.get(stageId).getIndexOfSortedRiderId(riderId);
+			LocalTime time = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(index);
+			return time;
+		} else {
+			return (null);
+
+		}
 	}
 
 	public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
+		Collection<Stages> stageObject = Stages.stages_hashmap.values();
+		// Checks if the id matches any of the riders in the system
+		for (Stages obj : stageObject) {
+			if (obj.getStageId() == (stageId)) {
+				// If the Id does not match then IDNotRecognisedException is thrown
+				throw new IDNotRecognisedException("This Stage ID is not found");
+			}
+		}
+
+		ArrayList<Integer> riderIds = Riders.allRidersIds;
+		// Checks if the id matches any of the riders in the system
+		if (riderIds.contains(riderId) == false) {
+			// If conditions are met then IDNotRecognisedException is thrown
+			throw new IDNotRecognisedException("The ID does not match to any rider in the system");
+		}
+		Stages.stages_hashmap.get(stageId).removeResults(riderId);
 
 	}
 
 	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
+		Collection<Stages> stageObject = Stages.stages_hashmap.values();
+		// Checks if the id matches any of the riders in the system
+		for (Stages obj : stageObject) {
+			if (obj.getStageId() == (stageId)) {
+				// If the Id does not match then IDNotRecognisedException is thrown
+				throw new IDNotRecognisedException("This Stage ID is not found");
+			}
+		}
+
 		int[] list = Stages.stages_hashmap.get(stageId).getRidersRankList();
 		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() != 0) {
 			return list;
@@ -479,15 +659,21 @@ public class CyclingPortal implements CyclingPortalInterface {
 			int[] emptyList = new int[1];
 			return emptyList;
 		}
-
-		// An empty list if there is no result for the stage.
 	}
 
 	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
+		Collection<Stages> stageObject = Stages.stages_hashmap.values();
+		// Checks if the id matches any of the riders in the system
+		for (Stages obj : stageObject) {
+			if (obj.getStageId() == (stageId)) {
+				// If the Id does not match then IDNotRecognisedException is thrown
+
+				throw new IDNotRecognisedException("This Stage ID is not found");
+			}
+		}
+
 		LocalTime[] list = Stages.stages_hashmap.get(stageId).getRidersRankedAdjustedList();
 		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() != 0) {
-			// can change this if to use a boolean method in stages, that checks if
-			// sortedRiderIds.isEmpty()
 			return list;
 		} else {
 			LocalTime[] emptyList = new LocalTime[1];
@@ -495,12 +681,23 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 	}
 
-	// this method below can be ccalled multiple time in the getRidersPointsInRace
-	// method
 	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
-		calculateAllRidersPointsInStage(stageId, "SPRINT");
+		Collection<Stages> stageObject = Stages.stages_hashmap.values();
+		// Checks if the id matches any of the riders in the system
+		if (Stages.stages_hashmap.get(stageId).getState() == "RESULTS") {
+			for (Stages obj : stageObject) {
+				if (obj.getStageId() == (stageId)) {
+					// If the Id does not match then IDNotRecognisedException is thrown
+					throw new IDNotRecognisedException("This Stage ID is not found");
+				}
+			}
+			calculateAllRidersPointsInStage(stageId, "SPRINT");
 
-		return Stages.stages_hashmap.get(stageId).getRidersPoints();
+			return Stages.stages_hashmap.get(stageId).getRidersPoints();
+		} else {
+			int[] array = new int[1];
+			return array;
+		}
 
 	}
 
@@ -522,9 +719,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 					case MEDIUM_MOUNTAIN:
 						stage.addToRiderPoints(index, medium_mountain[index]);
+						stage.addToRidersMountainPts(index, medium_mountain[index]);
 
 					case HIGH_MOUNTAIN:
 						stage.addToRiderPoints(index, high_mountain[index]);
+						stage.addToRidersMountainPts(index, medium_mountain[index]);
 
 					case TT:
 						stage.addToRiderPoints(index, time_trial[index]);
@@ -533,14 +732,20 @@ public class CyclingPortal implements CyclingPortalInterface {
 				index++;
 			}
 
-			for (int u = 0; u < segments.size(); u++) {
-				SegmentType segment = segments.get(u);
-				// for (SegmentType segment : segments) {
-				if (segment == SegmentType.valueOf("SPRINT")) {
-					stage.searchSpecificSegmentAndSort(SegmentType.valueOf("SPRINT"), typeIndex);
-					int final_index = stage.getSortedRiderIndexBySegment(typeIndex, index);
+			if (type != StageType.TT) {
+				// there are no segments in a TT Stage.
+			}
 
-					stage.addToRiderPoints(index, intermediate_sprint[final_index]);
+			else {
+				for (int u = 0; u < segments.size(); u++) {
+					SegmentType segment = segments.get(u);
+					// for (SegmentType segment : segments) {
+					if (segment == SegmentType.valueOf("SPRINT")) {
+						stage.searchSpecificSegmentAndSort(SegmentType.valueOf("SPRINT"), typeIndex);
+						int final_index = stage.getSortedRiderIndexBySegment(typeIndex, index);
+
+						stage.addToRiderPoints(index, intermediate_sprint[final_index]);
+					}
 				}
 			}
 
@@ -548,64 +753,297 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		else if (pointsDistributionChoice.equals("GC")) {
 			int typeIndex = 1;
-
 		}
 
 		else if (pointsDistributionChoice.equals("Mountain")) {
 			int typeIndex = 2;
-
-			stage.searchSpecificSegmentAndSort(SegmentType.valueOf("M"), typeIndex);
-
-		}
-
-		else {
-			// add exception
+			stage.searchSpecificSegmentAndSort(SegmentType.valueOf(""), typeIndex);
 		}
 	}
 
 	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
-		calculateAllRidersPointsInStage(stageId, "Mountain");
+		if (Stages.stages_hashmap.get(stageId).getState() == "RESULTS") {
+			Collection<Stages> stageObject = Stages.stages_hashmap.values();
+			// Checks if the id matches any of the riders in the system
+			for (Stages obj : stageObject) {
+				if (obj.getStageId() == (stageId)) {
+					// If the Id does not match then IDNotRecognisedException is thrown
+					throw new IDNotRecognisedException("This Stage ID is not found");
+				}
+			}
 
-		return null;
+			int[] mtPoints = Stages.stages_hashmap.get(stageId).getAllRidersMtPoints().stream()
+					.mapToInt(Integer::intValue)
+					.toArray();
+			return mtPoints;
+		} else {
+			int[] array = new int[1];
+			return array;
+		}
+
 	}
 
 	public void eraseCyclingPortal() {
 
+		// Erase all hashmaps
+		Races.races_hashmap.clear();
+		Stages.stages_hashmap.clear();
+		Stages.segment_and_stage_ids.clear();
+		Teams.teamsHashMap.clear();
+		Riders.riders_hashmap.clear();
+
+		// Reset all counters
+		Races.total_races = 0;
+		Stages.total_stages = 0;
+		Stages.segment_counter = 0;
+		Teams.total_teams = 0;
+		Teams.id_index = 0;
+		Teams.riderCount = 0;
+		Riders.total_riders = 0;
 	}
 
 	public void saveCyclingPortal(String filename) throws IOException {
-
+		FileOutputStream fileOut = new FileOutputStream(filename);
+		ObjectOutputStream out = new ObjectOutputStream(fileOut);
+		out.close();
 	}
 
 	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
-
+		FileInputStream fileIn = new FileInputStream(filename);
+		ObjectInputStream in = new ObjectInputStream(fileIn);
+		in.close();
+		fileIn.close();
 	}
 
 	public void removeRaceByName(String name) throws NameNotRecognisedException {
-
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getName() != name) {
+				// If the conditions are met then an exception is thrown.
+				throw new NameNotRecognisedException("This raceId is not found");
+			}
+		}
+		Collection<Races> objects = Races.getRaceObjects();
+		for (Races obj : objects) {
+			obj.deleteRace(obj.getRaceId());
+		}
 	}
 
 	public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
-		return null;
+		// Checks if the raceId matches to any in the system.
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
+				throw new IDNotRecognisedException("This raceId is not found");
+			}
+		}
+
+		int[] ids = Races.races_hashmap.get(raceId).getStageIds();
+		Stages.stages_hashmap.get(ids[0])
+				.resetArrayListValues(Stages.stages_hashmap.get(ids[0]).getNumberOfRegisteredRiders());
+
+		for (int stageId : ids) {
+			LocalTime[] elapsedTime = Stages.stages_hashmap.get(stageId).getRidersRankedAdjustedList();
+			ArrayList<Integer> riderslist = Stages.stages_hashmap.get(stageId).getRidersRankedArrayList();
+
+			for (int b = 0; b < riderslist.size(); b++) {
+				Races.races_hashmap.get(raceId).addToAdjustedElapsedTimes(b, elapsedTime[b]);
+				Races.riders_and_adj_elapsed_time.put(elapsedTime[b], riderslist.get(b));
+			}
+		}
+
+		ArrayList<LocalTime> sortedTimes = Races.races_hashmap.get(raceId).getAdjElapsedTimes();
+		ArrayList<Integer> finalSortedRiders = new ArrayList<>();
+
+		for (int q = 0; q < sortedTimes.size(); q++) {
+			int localVar = Races.riders_and_adj_elapsed_time.get(sortedTimes.get(q));
+			finalSortedRiders.add(localVar);
+		}
+
+		LocalTime[] finalSortedRidersArray = finalSortedRiders.toArray(new LocalTime[] {});
+
+		return finalSortedRidersArray;
 	}
 
 	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
-		return null;
+		// Checks if the raceId matches to any in the system.
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
+				throw new IDNotRecognisedException("This raceId is not found");
+			}
+		}
+
+		int[] stageIds = Races.races_hashmap.get(raceId).getStageIds();
+		int[] totalPoints = new int[Stages.stages_hashmap.get(stageIds[0]).getNumberOfRegisteredRiders()];
+
+		for (int stageId : stageIds) {
+			int[] points = getRidersPointsInStage(stageId);
+			for (int x = 0; x < totalPoints.length; x++) {
+				totalPoints[x] = totalPoints[x] + points[x];
+			}
+		}
+		return totalPoints;
 	}
 
 	public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
-		return null;
+		// Checks if the raceId matches to any in the system.
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
+				throw new IDNotRecognisedException("This raceId is not found");
+			}
+		}
+		ArrayList<Integer> sortedPointsByTotalElapsedTime = new ArrayList<>();
+
+		ArrayList<Integer> riders = Races.races_hashmap.get(raceId).getRidersByGCRankArrayList();
+		ArrayList<Integer> totalPoints = new ArrayList<>(Races.races_hashmap.get(raceId).getRidersByGCRank().length);
+		ArrayList<LocalTime> totalElapsedTimes = new ArrayList<>(
+				Races.races_hashmap.get(raceId).getRidersByGCRank().length);
+		HashMap<Integer, LocalTime> indexAndTotalElapsedTimeHashMap = new HashMap<>();
+
+		for (int stageId : Races.races_hashmap.get(raceId).getStageIds()) {
+
+			ArrayList<Integer> sorted_rider_ids = Stages.stages_hashmap.get(stageId).getRidersRankedArrayList();
+			ArrayList<LocalTime[]> results = Stages.stages_hashmap.get(stageId).getRidersSortedResultsArraylist();
+
+			int[] mtStagePoints = getRidersMountainPointsInStage(stageId);
+			for (int d = 0; d < mtStagePoints.length; d++) {
+
+				if (totalPoints.get(d) == null) {
+					totalPoints.add(d, mtStagePoints[d]);
+				}
+
+				else {
+					int oldPoints = totalPoints.get(d);
+					totalPoints.set(d, oldPoints + mtStagePoints[d]);
+				}
+
+				LocalTime[] checkpoints = results.get(d);
+				if (totalElapsedTimes.get(d) == null) {
+					totalElapsedTimes.add(d, checkpoints[checkpoints.length - 1]);
+					indexAndTotalElapsedTimeHashMap.put(sorted_rider_ids.get(d), checkpoints[checkpoints.length - 1]);
+				}
+
+				else {
+					LocalTime oldElapsedTime = totalElapsedTimes.get(d);
+					int hour1 = oldElapsedTime.getHour();
+					int min1 = oldElapsedTime.getHour();
+					int sec1 = oldElapsedTime.getHour();
+
+					int hour2 = checkpoints[checkpoints.length - 1].getHour();
+					int min2 = checkpoints[checkpoints.length - 1].getHour();
+					int sec2 = checkpoints[checkpoints.length - 1].getHour();
+
+					LocalTime newElapsedTime = LocalTime.of(hour1 + hour2, min1 + min2, sec1 + sec2);
+
+					totalElapsedTimes.set(d, newElapsedTime);
+					indexAndTotalElapsedTimeHashMap.put(sorted_rider_ids.get(d), newElapsedTime);
+
+				}
+
+			}
+
+		}
+
+		ArrayList<Integer> finalSortedRiderIdsArr = new ArrayList<>(totalElapsedTimes.size());
+		for (int i = 0; i < totalElapsedTimes.size(); i++) {
+			LocalTime one = totalElapsedTimes.get(i);
+			for (int y = 1; y < totalElapsedTimes.size() - 1; y++) {
+				LocalTime two = totalElapsedTimes.get(y);
+
+				if (two.isBefore(one)) {
+					finalSortedRiderIdsArr.set(i, riders.get(y));
+					finalSortedRiderIdsArr.set(y, riders.get(i));
+				}
+
+				else {
+					finalSortedRiderIdsArr.set(i, riders.get(i));
+					finalSortedRiderIdsArr.set(y, riders.get(y));
+
+				}
+
+			}
+
+			for (int id : finalSortedRiderIdsArr) {
+				sortedPointsByTotalElapsedTime.add(totalPoints.get(id));
+			}
+
+		}
+
+		int[] sortedPointsByTotalElapsedTimeArray = sortedPointsByTotalElapsedTime.stream().mapToInt(Integer::intValue)
+				.toArray();
+
+		return sortedPointsByTotalElapsedTimeArray;
 	}
 
 	public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {
-		return null;
+		// Checks if the raceId matches to any in the system.
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
+				throw new IDNotRecognisedException("This raceId is not found");
+			}
+		}
+
+		ArrayList<LocalTime> times = Races.races_hashmap.get(raceId).getAdjElapsedTimes();
+		for (int t = 0; t < times.size(); t++) {
+			for (int c = 1; c < times.size() - 1; c++) {
+				if (times.get(c).isBefore(times.get(t))) {
+					int stageid = Races.races_hashmap.get(raceId).getStageIds()[0];
+					ArrayList<Integer> riderIds = Stages.stages_hashmap.get(stageid).getRidersRankedArrayList();
+
+					Races.races_hashmap.get(raceId).addRiderIdToAdjElapsedList(t, riderIds.get(c));
+					Races.races_hashmap.get(raceId).addRiderIdToAdjElapsedList(c, riderIds.get(t));
+				}
+			}
+		}
+
+		int[] stageIds = Races.races_hashmap.get(raceId).getStageIds();
+		boolean flag = true;
+		for (int id : stageIds) {
+			if (Stages.stages_hashmap.get(id).getState() != "RESULTS") {
+				flag = false;
+				break;
+			}
+		}
+		if (flag == true) {
+			int[] emptyArray = new int[1];
+			return emptyArray;
+
+		} else {
+			return Races.races_hashmap.get(raceId).getRidersByGCRank();
+
+		}
+
 	}
 
 	public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
+		// Checks if the raceId matches to any in the system.
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
+				throw new IDNotRecognisedException("This raceId is not found");
+			}
+		}
+
 		return null;
 	}
 
 	public int[] getRidersMountainPointClassificationRank(int raceId) throws IDNotRecognisedException {
+		// Checks if the raceId matches to any in the system.
+		Collection<Races> raceObjects = Races.races_hashmap.values();
+		for (Races obj : raceObjects) {
+			if (obj.getRaceId() == (raceId)) {
+				// If the conditions are met then an exception is thrown.
+				throw new IDNotRecognisedException("This raceId is not found");
+			}
+		}
 		return null;
 	}
 
@@ -627,19 +1065,6 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		// HOW DOES THIS MAKE SENSE, IT COULD TECHNICALLY ALSO BE ONE HOUR AHEAD, BUT
 		// BEHIND BY A FEW NANOSECONDS??
-	}
-
-	public void calculateRidersPointsInStage(int riderId) {
-		// can be used recursively in calculating points of all riders in stage, and
-		// points in race.
-	}
-
-	public void calculateSprinterClassPointsOfRider(int riderId) {
-
-	}
-
-	public void calculateMountClassPointsOfRider(int riderId) {
-
 	}
 
 }

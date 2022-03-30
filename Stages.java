@@ -21,8 +21,8 @@ public class Stages {
     private int raceId;
     private String description;
     private String stage_state = "";
-    //SEGMENT: Contains segments.
-    //RESULTS: Results exist.
+    // SEGMENT: Contains segments.
+    // RESULTS: Results exist.
     public static int total_stages = 0;
     private Double location;
     private double length;
@@ -41,8 +41,9 @@ public class Stages {
                                                                  // entry.
 
     private ArrayList<ArrayList<Integer>> sortedRiderIdsBySegment = new ArrayList<>();
+    private ArrayList<Integer> ridersMountainPts = new ArrayList<>();
     // index 0: ArrayList of sorted Riders Ids by Sprint Segment
-    // index
+    // index 1: 
 
     // uses the sortedRiderIds to add corresponding values,
     // hence the swapSortElapsedTimes must be executed before this can be used.
@@ -70,15 +71,33 @@ public class Stages {
         this.stageId = stageId;
     }
 
-    public boolean containsResults(int riderId){
+    public void removeRider(int riderId){
+        Riders.allRidersIds.remove(riderId);
+        Riders.riders_hashmap.remove(riderId);
+        removeResults(riderId);
+    }
+
+    public void removeResults(int riderId){
+        stages_results.remove(riderId);
+        this.ridersMountainPts.remove(riderId);
+        this.sortedRiderIdsBySegment.remove(riderId);
+        int index = sortedRiderIds.indexOf(riderId);
+        sortedRiderIds.remove(riderId);
+        ridersPoints.remove(index);
+        sortedElapsedRiderResults.remove(index);
+        adjustedElapsedTimes.remove(index);
+
+    }
+
+    public boolean containsResults(int riderId) {
         return this.stages_results.containsKey(riderId);
     }
 
-    public void addToSegmentLengthTotal(double length){
+    public void addToSegmentLengthTotal(double length) {
         this.tempSegmentLengthTotal = tempSegmentLengthTotal + length;
     }
 
-    public double getSegmentTotalLength(){
+    public double getSegmentTotalLength() {
         return this.tempSegmentLengthTotal;
     }
 
@@ -99,7 +118,7 @@ public class Stages {
         return this.stage_type;
     }
 
-    public double getStageLength(){
+    public double getStageLength() {
         return this.length;
     }
 
@@ -108,8 +127,10 @@ public class Stages {
         this.sortedRiderIds.add(index, riderId);
         this.adjustedElapsedTimes.add(index, LocalTime.of(00, 00, 00));
         this.ridersPoints.add(0);
+        this.ridersMountainPts.add(0);
 
     }
+
 
     public LocalTime getLastElapsedTimeInArray(int index) {
         LocalTime[] array = this.sortedElapsedRiderResults.get(index - 1);
@@ -150,11 +171,11 @@ public class Stages {
         }
     }
 
-    public void setState(String state){
+    public void setState(String state) {
         this.stage_state = state;
     }
 
-    public String getState(){
+    public String getState() {
         return this.stage_state;
     }
 
@@ -203,6 +224,10 @@ public class Stages {
         stages_results.put(riderId, checkpoints);
         registeredRiders++;
     }
+
+    public void updateResults(int riderId, LocalTime[] oldcheckpoints, LocalTime[] newCheckpoints) {
+        stages_results.replace(riderId, oldcheckpoints, newCheckpoints);
+    }
     // do i need this? elapsedsortedarrays are enough? check
     // registerRiderResultsInStage
 
@@ -242,6 +267,10 @@ public class Stages {
         return rankedIdList;
     }
 
+    public ArrayList<Integer> getRidersRankedArrayList() {
+        return sortedRiderIds;
+    }
+
     public LocalTime[] getRidersRankedAdjustedList() {
         LocalTime[] rankedAdjList = adjustedElapsedTimes.toArray(new LocalTime[] {});
         return rankedAdjList;
@@ -252,9 +281,18 @@ public class Stages {
         this.ridersPoints.set(index, oldPoints + points);
     }
 
-    public int[] getRidersPoints(){
+    public void addToRidersMountainPts(int index, int points) {
+        int oldPoints = this.ridersMountainPts.get(index);
+        this.ridersMountainPts.set(index, oldPoints + points);
+    }
+
+    public int[] getRidersPoints() {
         int[] riders_points = this.ridersPoints.stream().mapToInt(Integer::intValue).toArray();
         return riders_points;
+    }
+
+    public ArrayList<Integer> getAllRidersMtPoints() {
+        return ridersMountainPts;
     }
 
     public int getIndexInSortedArrays(int riderId) {
@@ -263,6 +301,10 @@ public class Stages {
 
     public LocalTime[] getRidersSortedResultsOfRider(int index) {
         return (this.sortedElapsedRiderResults.get(index));
+    }
+
+    public ArrayList<LocalTime[]> getRidersSortedResultsArraylist() {
+        return (this.sortedElapsedRiderResults);
     }
 
     public void searchSpecificSegmentAndSort(SegmentType type, int typeIndex) {
@@ -297,26 +339,46 @@ public class Stages {
             }
             this.sortedRiderIdsBySegment.set(typeIndex, list);
 
-
         }
 
     }
 
-    public int getSortedRiderIndexBySegment(int typeIndex, int riderId){
+    public int getSortedRiderIndexBySegment(int typeIndex, int riderId) {
         ArrayList<Integer> temp_arraylist = this.sortedRiderIdsBySegment.get(typeIndex);
         return temp_arraylist.indexOf(riderId);
     }
 
-    public String getStageName(){
+    public String getStageName() {
         return this.stage_name;
     }
-    
-    public int getStageId(){
+
+    public int getStageId() {
         return this.stageId;
     }
 
+    public void deleteStage(int stageId) {
+        // Deleting Stage related data...
+        total_stages -= 1;
+        stages_hashmap.remove(stageId);
 
-    
-    
+        // Deleting segments related data...
+        segment_counter -= stage_private_segments.size();
+        segment_values.clear();
+        for (int segment : stage_private_segments) {
+            segment_and_stage_ids.remove(segment);
+        }
+        stage_private_segments.clear();
+
+        // Deleting Results related data...
+        stages_results.clear();
+        ridersPoints.clear();
+
+    }
+
+    public void resetArrayListValues(int arrayListSize) {
+        for (int x = 0; x < arrayListSize; x++) {
+            Races.races_hashmap.get(raceId).addToAdjustedElapsedTimes(x, LocalTime.of(00, 00, 00));
+        }
+    }
+
 }
-

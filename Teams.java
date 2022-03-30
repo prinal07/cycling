@@ -54,12 +54,20 @@ public class Teams {
         }
     }
 
-    public void remove(int riderId){
-///////COMPLETEEEEEE THISSSSSSS
+    public static void remove(int teamId){
+        teamsHashMap.remove(teamId);
+        total_teams -= 1;
+
+        for (int x = 0; x<teamId_list.length;x++){
+            if (teamId_list[x] == teamId){
+                teamId_list[x] = -1;
+            }
+        }
     }
 
     public String getName(){
         return this.name;
+
     }
 
 }

@@ -26,7 +26,6 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
 
         Teams team = new Teams();          
         team.addRider(riderId, teamID);
-    
 
         return(riderId);
     }
@@ -47,8 +46,9 @@ public class Riders{   //I changed it from Teams extending Riders, to Riders ext
         this.riderId = riderId;
     }
 
-    public void removeRider(int riderId){
-        //Need to finish this
+    public static void removeRider(int riderId){
+        allRidersIds.remove(riderId);
+        riders_hashmap.remove(riderId);
     }
     
 
