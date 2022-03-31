@@ -41,21 +41,22 @@ public class Stages {
                                                                  // entry.
 
     private ArrayList<ArrayList<Integer>> sortedRiderIdsBySegment = new ArrayList<>();
-    private ArrayList<Integer> ridersMountainPts = new ArrayList<>();
     // index 0: ArrayList of sorted Riders Ids by Sprint Segment
     // index 1: 
 
+    private ArrayList<Integer> ridersMountainPts = new ArrayList<>();
+    
     // uses the sortedRiderIds to add corresponding values,
     // hence the swapSortElapsedTimes must be executed before this can be used.
 
     private int segments_in_stage = 0;
     public static int segment_counter = 0; // Total segments in entirety.
-    public static HashMap<Integer, Stages> stages_hashmap;
+    public static HashMap<Integer, Stages> stages_hashmap = new HashMap<>();
 
-    public static HashMap<Integer, Integer> segment_and_stage_ids;
+    public static HashMap<Integer, Integer> segment_and_stage_ids = new HashMap<>();
 
     private ArrayList<Integer> stage_private_segments = new ArrayList<>();
-    private ArrayList<SegmentType> segment_values;
+    private ArrayList<SegmentType> segment_values = new ArrayList<>();
 
     public Stages(String stageName, String description, double length, LocalDateTime startTime, int raceId,
             StageType type) {
@@ -78,11 +79,24 @@ public class Stages {
     }
 
     public void removeResults(int riderId){
-        stages_results.remove(riderId);
-        this.ridersMountainPts.remove(riderId);
-        this.sortedRiderIdsBySegment.remove(riderId);
+        stages_results.get(riderId);
         int index = sortedRiderIds.indexOf(riderId);
-        sortedRiderIds.remove(riderId);
+        // int a = this.sortedRiderIdsBySegment.get(0).get(index);
+        int b = this.ridersMountainPts.get(index);
+        int c= sortedRiderIds.get(index);
+        int d= ridersPoints.get(index);
+        LocalTime[] e= sortedElapsedRiderResults.get(index);
+        LocalTime f= adjustedElapsedTimes.get(index);
+
+        System.out.println(" b: "+ b + " c: " +c + " d: "+ d+ " e: "+ e+ " f: "+ f);
+
+
+        stages_results.remove(riderId);
+        //int index = sortedRiderIds.indexOf(riderId);
+        System.out.println("Index: "+ index);
+        // this.sortedRiderIdsBySegment.get(0).remove(index);
+        this.ridersMountainPts.remove(index);
+        sortedRiderIds.remove(index);
         ridersPoints.remove(index);
         sortedElapsedRiderResults.remove(index);
         adjustedElapsedTimes.remove(index);
@@ -129,6 +143,8 @@ public class Stages {
         this.adjustedElapsedTimes.add(index, LocalTime.of(00, 00, 00));
         this.ridersPoints.add(0);
         this.ridersMountainPts.add(0);
+        registeredRiders++;
+
 
     }
 
@@ -170,6 +186,7 @@ public class Stages {
                 break;
             }
         }
+        registeredRiders++;
     }
 
     public void setState(String state) {
@@ -223,7 +240,6 @@ public class Stages {
 
     public void addResultsToStage(int riderId, LocalTime... checkpoints) {
         stages_results.put(riderId, checkpoints);
-        registeredRiders++;
     }
 
     public void updateResults(int riderId, LocalTime[] oldcheckpoints, LocalTime[] newCheckpoints) {
@@ -378,6 +394,7 @@ public class Stages {
 
     public void resetArrayListValues(int arrayListSize) {
         for (int x = 0; x < arrayListSize; x++) {
+            System.out.println(raceId);
             Races.races_hashmap.get(raceId).addToAdjustedElapsedTimes(x, LocalTime.of(00, 00, 00));
         }
     }

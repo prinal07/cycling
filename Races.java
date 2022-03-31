@@ -20,11 +20,13 @@ public class Races {
     private ArrayList<Integer> riderIdsByAdjElapsedTimeInRace = new ArrayList<>();
     public static HashMap<LocalTime, Integer> riders_and_adj_elapsed_time = new HashMap<>();
     public static ArrayList<Integer> raceIds = new ArrayList<>();
+    public static int raceIdCtr = 0;
 
     private ArrayList<Integer> ridersTotalMtPoints = new ArrayList<>();
 
     public static HashMap<Integer, Races> races_hashmap = new HashMap<>();
-    private int[] stageIdArray = new int[21]; // google says there are 21 stages in the grand tour
+    private int[] stageIdArray = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    // google says there are 21 stages in the grand tour
 
     public Races() {
     }
@@ -47,14 +49,15 @@ public class Races {
         return (this.raceId);
     }
 
-    public static int[] getRaceIds(){
+    public static int[] getRaceIds() {
         return raceIds.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public void setTotalMtResults(ArrayList<Integer> points){
+    public void setTotalMtResults(ArrayList<Integer> points) {
         this.ridersTotalMtPoints.addAll(points);
 
     }
+
     public int getNumberOfStages() {
         return (this.number_of_stages);
     }
@@ -70,7 +73,6 @@ public class Races {
         this.total_length = (int) (total_length + stage.getLength());
     }
 
-   
     public static void sortRaceStages(int raceId, LocalDateTime[] array) {
         Arrays.sort(array);
     }
@@ -103,16 +105,22 @@ public class Races {
     }
 
     public void addToAdjustedElapsedTimes(int index, LocalTime time) {
-        LocalTime oldTime = this.ridersAdjustedElapsedTimeInRace.get(index);
-        int hours = time.getHour();
-        int mins = time.getMinute();
-        int sec = time.getSecond();
+        if (index == 0) {
+            this.ridersAdjustedElapsedTimeInRace.add(index, time);
+        } else {
+            LocalTime oldTime = this.ridersAdjustedElapsedTimeInRace.get(index);
+            int hours = time.getHour();
+            int mins = time.getMinute();
+            int sec = time.getSecond();
 
-        int oldhours = oldTime.getHour();
-        int oldmins = oldTime.getMinute();
-        int oldsec = oldTime.getSecond();
+            int oldhours = oldTime.getHour();
+            int oldmins = oldTime.getMinute();
+            int oldsec = oldTime.getSecond();
 
-        this.ridersAdjustedElapsedTimeInRace.set(index, LocalTime.of(oldhours + hours, mins + oldmins, sec + oldsec));
+            this.ridersAdjustedElapsedTimeInRace.set(index,
+                    LocalTime.of(oldhours + hours, mins + oldmins, sec + oldsec));
+        }
+
     }
 
     public void addtoAdjArrayList(int index, LocalTime value) {
@@ -120,20 +128,24 @@ public class Races {
         this.riderIdsByAdjElapsedTimeInRace.add(0);
     }
 
-    public ArrayList<LocalTime> getAdjElapsedTimes(){
+    public ArrayList<LocalTime> getAdjElapsedTimes() {
         return this.ridersAdjustedElapsedTimeInRace;
     }
 
-    public void addRiderIdToAdjElapsedList(int index, int riderId){
+    public void addRiderIdToAdjElapsedList(int index, int riderId) {
         this.riderIdsByAdjElapsedTimeInRace.set(index, riderId);
     }
 
-    public int[] getRidersByGCRank(){
+    public int getIndexForAdjArrays(int riderId) {
+        return this.riderIdsByAdjElapsedTimeInRace.indexOf(riderId);
+    }
+
+    public int[] getRidersByGCRank() {
         int[] list = this.riderIdsByAdjElapsedTimeInRace.stream().mapToInt(Integer::intValue).toArray();
         return list;
     }
 
-    public ArrayList<Integer> getRidersByGCRankArrayList(){
+    public ArrayList<Integer> getRidersByGCRankArrayList() {
         return this.riderIdsByAdjElapsedTimeInRace;
     }
 }

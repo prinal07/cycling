@@ -16,6 +16,7 @@ public class Teams {
     private int[] riders_list = new int[9];
 
     public static HashMap<Integer, Teams> teamsHashMap = new HashMap<>();
+    public static int id_index;
 
     public Teams(){  
     }
@@ -61,8 +62,8 @@ public class Teams {
     }
 
     public static void remove(int teamId){
-        teamsHashMap.remove(teamId);
         teamsHashMap.get(teamId).removeAllRidersFromTeam();
+        teamsHashMap.remove(teamId);
         total_teams -= 1;
 
         for (int x = 0; x<teamId_list.length;x++){
