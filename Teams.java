@@ -7,7 +7,7 @@ public class Teams {
     private String description;
     public static int total_teams = 0;
     private int teamId;
-    public static int id_index = 0; 
+    // public static int id_index = 0; 
     public static int riderCount = 0;
     
     public static int[] teamId_list = new int[22];  //googled the number of teams, and feel like should be some fixed number, which can be changed if needed.
@@ -35,13 +35,19 @@ public class Teams {
     }
 
     public void addTeamIdToList(int teamId){
-        teamId_list[id_index++] = teamId;
+        teamId_list[total_teams++] = teamId;
         //teamIds.add(teamId);
     } 
     
     public int[] getRiderIdList(){
         return riders_list;
     }
+
+    public void removeAllRidersFromTeam(){
+        int [] empty = new int [22];
+        this.riders_list = empty;
+    }
+
 //addRider is needed to add a rider to a new team after being removed
     public void addRider(int riderId, int teamId){
         for (int i:teamId_list){
@@ -56,6 +62,7 @@ public class Teams {
 
     public static void remove(int teamId){
         teamsHashMap.remove(teamId);
+        teamsHashMap.get(teamId).removeAllRidersFromTeam();
         total_teams -= 1;
 
         for (int x = 0; x<teamId_list.length;x++){

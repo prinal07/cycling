@@ -93,6 +93,7 @@ public class Stages {
         return this.stages_results.containsKey(riderId);
     }
 
+
     public void addToSegmentLengthTotal(double length) {
         this.tempSegmentLengthTotal = tempSegmentLengthTotal + length;
     }

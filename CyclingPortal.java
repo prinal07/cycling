@@ -413,6 +413,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		Teams.remove(teamId);
+		
 
 	}
 
@@ -438,13 +439,24 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	public int createRider(int teamID, String name, int yearOfBirth)
 			throws IDNotRecognisedException, IllegalArgumentException {
-		// Checks if the id mathces to any id in the system.
+		// Checks if the id matches to any id in the system.
+		Boolean flag = false;
 		Collection<Teams> teamobject = Teams.teamsHashMap.values();
 		for (Teams obj : teamobject) {
 			if (obj.getTeamId() == (teamID)) {
-				// If the conditions are met then IDNotRecognisedException is thrown
-				throw new IDNotRecognisedException("The ID does not match to any team in the system");
+				flag = true;
 			}
+			else{
+				flag = false;
+			}
+		}
+
+		if (flag= true){
+		}
+		
+		else{
+			// If the conditions are met then IDNotRecognisedException is thrown
+			throw new IDNotRecognisedException("The ID does not match to any team in the system");
 		}
 
 		// Checks if the name of the rider is null and if the year of birth is less than
@@ -455,7 +467,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 		int local_rider_id;
 		Riders rider = new Riders(name, yearOfBirth);
-		local_rider_id = ++Riders.total_riders;
+		local_rider_id = Riders.total_riders+=1;
 		rider.setRiderId(local_rider_id);
 
 		Teams.teamsHashMap.get(teamID)
@@ -1063,8 +1075,6 @@ public class CyclingPortal implements CyclingPortalInterface {
 			b = Stages.stages_hashmap.get(stageId).getNextElapsedTimeInArray(++index);
 		}
 
-		// HOW DOES THIS MAKE SENSE, IT COULD TECHNICALLY ALSO BE ONE HOUR AHEAD, BUT
-		// BEHIND BY A FEW NANOSECONDS??
 	}
 
 }
