@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.annotation.AnnotationTypeMismatchException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -13,6 +12,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+/**
+ * CyclingPortal interface.
+ *
+ * @author Prinal Patel
+ * @author Tharun Veluri
+ * @version 1.1
+ *
+ */
 public class CyclingPortal implements CyclingPortalInterface {
 
 	public static int[] flat = { 50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2 };
@@ -27,6 +34,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 	public static int[] C1 = { 10, 8, 6, 4, 2, 1, 0, 0 };
 	public static int[] HC = { 20, 15, 12, 10, 8, 6, 4, 2 };
 
+	/**
+	 * Get the races currently created in the platform.
+	 *
+	 * @return An array of race IDs in the system or an empty array if none exists.
+	 */
 	@Override
 	public int[] getRaceIds() {
 		if (Races.total_races == 0) {
@@ -37,6 +49,18 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 	}
 
+	/**
+	 * The method creates a staged race in the platform with the given name and
+	 * description.
+	 *
+	 * @param name        Race’s name.
+	 * @param description Race’s description (can be null).
+	 * @throws IllegalNameException If the name already exists in the platform.
+	 * @throws InvalidNameException If the name is null, empty, has more than 30
+	 *                              characters, or has white spaces.
+	 * @return the unique ID of the created race.
+	 *
+	 */
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
 		// This if statement checks if the name is null, empty, has more than 30
@@ -62,12 +86,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		// Creates a new race
 		Races race = new Races(name, description);
-		Races.total_races += 1;
-		int local_ctr = Races.raceIdCtr;
-		Races.raceIdCtr += 1;
+		Races.total_races++;
+		int local_ctr = Races.raceIdCtr++;
 		int local_race_id = local_ctr * 10;
 		race.setRaceId(local_race_id);
-		// Stores the raceId in the hashmap
+
 		Races.races_hashmap.put(local_race_id, race);
 
 		// Returns the raceId
@@ -75,6 +98,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * Get the details from a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return Any formatted string containing the race ID, name, description, the
+	 *         number of stages, and the total length (i.e., the sum of all stages’
+	 *         length).
+	 * @throws IDNotRecognisedException If the ID does not match to any race in the
+	 *                                  system.
+	 */
 	@Override
 	public String viewRaceDetails(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -103,6 +136,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * The method removes the race and all its related information, i.e., stages,
+	 * segments, and results.
+	 *
+	 * @param raceId The ID of the race to be removed.
+	 * @throws IDNotRecognisedException If the ID does not match to any race in the
+	 *                                  system.
+	 */
 	@Override
 	public void removeRaceById(int raceId) throws IDNotRecognisedException {
 
@@ -120,8 +161,18 @@ public class CyclingPortal implements CyclingPortalInterface {
 			// If the condtions are met then an IDNotRecognisedException is thrown
 			throw new IDNotRecognisedException("This raceId is not found");
 		}
+
+		Races.races_hashmap.get(raceId).deleteRace();
 	}
 
+	/**
+	 * The method queries the number of stages created for a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return The number of stages created for the race.
+	 * @throws IDNotRecognisedException If the ID does not match to any race in the
+	 *                                  system.
+	 */
 	@Override
 	public int getNumberOfStages(int raceId) throws IDNotRecognisedException {
 
@@ -144,6 +195,25 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return number_of_stages;
 	}
 
+	/**
+	 * Creates a new stage and adds it to the race.
+	 *
+	 * @param raceId      The race which the stage will be added to.
+	 * @param stageName   An identifier name for the stage.
+	 * @param description A descriptive text for the stage.
+	 * @param length      Stage length in kilometres.
+	 * @param startTime   The date and time in which the stage will be raced. It
+	 *                    cannot be null.
+	 * @param type        The type of the stage. This is used to determine the
+	 *                    amount of points given to the winner.
+	 * @return the unique ID of the stage.
+	 * @throws IDNotRecognisedException If the ID does not match to any race in the
+	 *                                  system.
+	 * @throws IllegalNameException     If the name already exists in the platform.
+	 * @throws InvalidNameException     If the new name is null, empty, has more
+	 *                                  than 30.
+	 * @throws InvalidLengthException   If the length is less than 5km.
+	 */
 	@Override
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
@@ -189,16 +259,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		Stages stage = new Stages(stageName, description, length, startTime, raceId, type);
-		int local_total_stages = Stages.total_stages++;
+		int local_total_stages = Stages.counter++;
 		int temp_stage_id = local_total_stages * 2;
 		stage.setStageId(temp_stage_id);
 
 		Races.races_hashmap.get(raceId)
-				.addToStagesHashMap(temp_stage_id, stage);
+				.addToStagesHashMap(temp_stage_id, stage, length);
 
 		return temp_stage_id;
 	}
 
+	/**
+	 * Retrieves the list of stage IDs of a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return The list of stage IDs ordered (from first to last) by their sequence
+	 *         in the
+	 *         race.
+	 * @throws IDNotRecognisedException If the ID does not match to any race in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
 
@@ -216,10 +296,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		int[] stages_ids = Races.races_hashmap.get(raceId).getStageIds();
-
 		return stages_ids;
 	}
 
+	/**
+	 * Gets the length of a stage in a race, in kilometres.
+	 *
+	 * @param stageId The ID of the stage being queried.
+	 * @return The stage’s length.
+	 * @throws IDNotRecognisedException If the ID does not match to any stage in the
+	 *                                  system.
+	 */
 	@Override
 	public double getStageLength(int stageId) throws IDNotRecognisedException {
 
@@ -240,6 +327,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return stage_length;
 	}
 
+	/**
+	 * Removes a stage and all its related data, i.e., segments and results.
+	 *
+	 * @param stageId The ID of the stage being removed.
+	 * @throws IDNotRecognisedException If the ID does not match to any stage in the
+	 *                                  system.
+	 */
 	@Override
 	public void removeStageById(int stageId) throws IDNotRecognisedException {
 
@@ -256,11 +350,32 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (flag3 == false) {
 			// If the conditions are met then IDNotRecognised is thrown
 			throw new IDNotRecognisedException("This Stage ID is not found");
-		} 
+		}
 
 		Stages.stages_hashmap.get(stageId).deleteStage(stageId);
 	}
 
+	/**
+	 * Adds a climb segment to a stage.
+	 *
+	 * @param stageId         The ID of the stage to which the climb segment is
+	 *                        being added.
+	 * @param location        The kilometre location where the climb finishes within
+	 *                        the stage.
+	 * @param type            The category of the climb - {@link SegmentType#C4},
+	 *                        {@link SegmentType#C3}, {@link SegmentType#C2},
+	 *                        {@link SegmentType#C1}, or {@link SegmentType#HC}.
+	 * @param averageGradient The average gradient for the climb.
+	 * @param length          The length of the climb in kilometre.
+	 * @return The ID of the segment created.
+	 * @throws IDNotRecognisedException   If the ID does not match to any stage in
+	 *                                    the system.
+	 * @throws InvalidLocationException   If the location is out of bounds of the
+	 *                                    stage length.
+	 * @throws InvalidStageStateException If the stage is "waiting for results".
+	 * @throws InvalidStageTypeException  Time-trial stages cannot contain any
+	 *                                    segment.
+	 */
 	@Override
 	public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
 			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
@@ -306,15 +421,32 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		Stages stage = Stages.stages_hashmap.get(stageId);
 		int temp_segment_id = (Stages.segment_counter) * 2;
+		Stages.segment_counter++;
 
 		stage.addSegmentIdAndValue(temp_segment_id, type);
 		Stages.addSegmentToHashMap(temp_segment_id, stageId);
 		stage.addToSegmentLengthTotal(length);
-		stage.setState("SEGMENTS");
+		stage.setState("Preparing");
 
 		return temp_segment_id;
 	}
 
+	/**
+	 * Adds an intermediate sprint to a stage.
+	 *
+	 * @param stageId  The ID of the stage to which the intermediate sprint segment
+	 *                 is being added.
+	 * @param location The kilometre location where the intermediate sprint finishes
+	 *                 within the stage.
+	 * @return The ID of the segment created.
+	 * @throws IDNotRecognisedException   If the ID does not match to any stage in
+	 *                                    the system.
+	 * @throws InvalidLocationException   If the location is out of bounds of the
+	 *                                    stage length.
+	 * @throws InvalidStageStateException If the stage is "waiting for results".
+	 * @throws InvalidStageTypeException  Time-trial stages cannot contain any
+	 *                                    segment.
+	 */
 	@Override
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
@@ -357,14 +489,23 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 		Stages stage = Stages.stages_hashmap.get(stageId);
 		int temp_segment_id = (Stages.segment_counter) * 2;
+		Stages.segment_counter++;
 
 		stage.addSegmentIdAndValue(temp_segment_id, SegmentType.valueOf("SPRINT"));
 		Stages.addSegmentToHashMap(temp_segment_id, stageId);
-		stage.setState("SEGMENTS");
+		stage.setState("Preparing");
 
 		return temp_segment_id;
 	}
 
+	/**
+	 * Removes a segment from a stage.
+	 *
+	 * @param segmentId The ID of the segment to be removed.
+	 * @throws IDNotRecognisedException   If the ID does not match to any segment in
+	 *                                    the system.
+	 * @throws InvalidStageStateException If the stage is "waiting for results".
+	 */
 	@Override
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
 
@@ -382,10 +523,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		int stageId = Stages.segment_and_stage_ids.get(segmentId);
-		System.out.println(stageId);
+		// System.out.println(stageId);
 		String state = Stages.stages_hashmap.get(stageId).getState();
-		System.out.println(state);
-
+		// System.out.println(state);
 
 		// Checks if the stage is able to perform an action in its current state
 		if (state.equals("waiting for results")) {
@@ -400,6 +540,15 @@ public class CyclingPortal implements CyclingPortalInterface {
 				.removeSegmentFromObjectList(segmentId);
 	}
 
+	/**
+	 * Concludes the preparation of a stage. After conclusion, the stage’s state
+	 * should be "waiting for results".
+	 *
+	 * @param stageId The ID of the stage to be concluded.
+	 * @throws IDNotRecognisedException   If the ID does not match to any stage in
+	 *                                    the system.
+	 * @throws InvalidStageStateException If the stage is "waiting for results".
+	 */
 	@Override
 	public void concludeStagePreparation(int stageId) throws IDNotRecognisedException, InvalidStageStateException {
 
@@ -430,6 +579,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * Retrieves the list of segment (mountains and sprints) IDs of a stage.
+	 *
+	 * @param stageId The ID of the stage being queried.
+	 * @return The list of segment IDs ordered (from first to last) by their
+	 *         location in the
+	 *         stage.
+	 * @throws IDNotRecognisedException If the ID does not match to any stage in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
@@ -449,6 +608,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return stage_segments;
 	}
 
+	/**
+	 * Creates a team with name and description.
+	 *
+	 * @param name        The identifier name of the team.
+	 * @param description A description of the team.
+	 * @return The ID of the created team.
+	 * @throws IllegalNameException If the name already exists in the platform.
+	 * @throws InvalidNameException If the new name is null, empty, has more than
+	 *                              30 characters.
+	 */
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
 
@@ -468,16 +637,21 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		int local_team_id;
-		Teams team = new Teams(name, description);
-		local_team_id = ++Teams.total_teams;
-		team.setTeamId(local_team_id);
-		team.addTeamIdToList(local_team_id);
-
+		local_team_id = Teams.team_counter++;
+		Teams.total_teams++;
+		Teams team = new Teams(name, description, local_team_id);
 		Teams.teamsHashMap.put(local_team_id, team);
 
 		return local_team_id;
 	}
 
+	/**
+	 * Removes a team from the system.
+	 *
+	 * @param teamId The ID of the team to be removed.
+	 * @throws IDNotRecognisedException If the ID does not match to any team in the
+	 *                                  system.
+	 */
 	@Override
 	public void removeTeam(int teamId) throws IDNotRecognisedException {
 		// Checks if the id matches any id in the system.
@@ -492,18 +666,34 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		if (flag6 == false) {
 			// If the conditions are met then IDNotRecognisedException is thrown.
-				throw new IDNotRecognisedException("The ID does not match to any team in the system");
-		} 
+			throw new IDNotRecognisedException("The ID does not match to any team in the system");
+		}
 
 		Teams.remove(teamId);
 
 	}
 
+	/**
+	 * Get the list of teams’ IDs in the system.
+	 *
+	 * @return The list of IDs from the teams in the system. An empty list if there
+	 *         are no teams in the system.
+	 *
+	 */
 	@Override
 	public int[] getTeams() {
-		return Teams.teamId_list;
+		int[] list = Teams.teamId_list.stream().mapToInt(Integer::intValue).toArray();
+		return list;
 	}
 
+	/**
+	 * Get the riders of a team.
+	 *
+	 * @param teamId The ID of the team being queried.
+	 * @return A list with riders’ ID.
+	 * @throws IDNotRecognisedException If the ID does not match to any team in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
 
@@ -525,6 +715,18 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return riderIdList;
 	}
 
+	/**
+	 * Creates a rider.
+	 *
+	 * @param teamID      The ID rider’s team.
+	 * @param name        The name of the rider.
+	 * @param yearOfBirth The year of birth of the rider.
+	 * @return The ID of the rider in the system.
+	 * @throws IDNotRecognisedException If the ID does not match to any team in the
+	 *                                  system.
+	 * @throws IllegalArgumentException If the name of the rider is null or the year
+	 *                                  of birth is less than 1900.
+	 */
 	@Override
 	public int createRider(int teamID, String name, int yearOfBirth)
 			throws IDNotRecognisedException, IllegalArgumentException {
@@ -555,8 +757,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 		int local_rider_id;
 		Riders rider = new Riders(name, yearOfBirth);
-		local_rider_id = Riders.total_riders += 1;
+		local_rider_id = Riders.rider_counter += 1;
 		rider.setRiderId(local_rider_id);
+		Riders.total_riders++;
 
 		Teams.teamsHashMap.get(teamID)
 				.addRider(local_rider_id, teamID);
@@ -567,6 +770,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * Removes a rider from the system. When a rider is removed from the platform,
+	 * all of its results should be also removed. Race results must be updated.
+	 *
+	 * @param riderId The ID of the rider to be removed.
+	 * @throws IDNotRecognisedException If the ID does not match to any rider in the
+	 *                                  system.
+	 */
 	@Override
 	public void removeRider(int riderId) throws IDNotRecognisedException {
 		// Checks if the riderId mathces to any rider in the system
@@ -580,6 +791,28 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * Record the times of a rider in a stage.
+	 *
+	 * @param stageId     The ID of the stage the result refers to.
+	 * @param riderId     The ID of the rider.
+	 * @param checkpoints An array of times at which the rider reached each of the
+	 *                    segments of the stage, including the start time and the
+	 *                    finish line.
+	 * @throws IDNotRecognisedException    If the ID does not match to any rider or
+	 *                                     stage in the system.
+	 * @throws DuplicatedResultException   Thrown if the rider has already a result
+	 *                                     for the stage. Each rider can have only
+	 *                                     one result per stage.
+	 * @throws InvalidCheckpointsException Thrown if the length of checkpoints is
+	 *                                     not equal to n+2, where n is the number
+	 *                                     of segments in the stage; +2 represents
+	 *                                     the start time and the finish time of the
+	 *                                     stage.
+	 * @throws InvalidStageStateException  Thrown if the stage is not "waiting for
+	 *                                     results". Results can only be added to a
+	 *                                     stage while it is "waiting for results".
+	 */
 	@Override
 	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
 			throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
@@ -619,9 +852,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		String state = Stages.stages_hashmap.get(stageId).getState();
-		System.out.println(state);
+		// System.out.println(state);
 		// Checks if the stage is able to perform an action in its current state
-		if (state.equals("RESULTS") || state != ("waiting for results")) {
+		if (state.equals("Preparing") || state != ("waiting for results")) {
 			// If not incompatible then an InvalidStageStateException is thrown
 			throw new InvalidStageStateException("Results not yet added.");
 		}
@@ -629,6 +862,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 		Stages stage = Stages.stages_hashmap.get(stageId);
 		stage.addResultsToStage(riderId, checkpoints);
 
+		int[] segments = Stages.stages_hashmap.get(stageId).getStageSegments();
+		for (int x = 0; x < checkpoints.length - 2; x++) {
+			Riders.riders_hashmap.get(riderId).addSegmentResultsToHashMap(segments[x], checkpoints[x + 1]);
+		}
 
 		LocalTime startTime = checkpoints[0];
 		String checkHour = checkpoints[checkpoints.length - 1].toString().substring(
@@ -642,9 +879,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 			LocalTime finishTime = LocalTime.of(Integer.parseInt(checkHour), Integer.parseInt(checkMin),
 					Integer.parseInt(checkSec));
 
-			System.out.println("Time as localtime: " + finishTime);
+			// System.out.println("Time as localtime: " + finishTime);
 			duration = Duration.between(startTime, finishTime);
-			System.out.println("Duration: " + duration);
+			// System.out.println("Duration: " + duration);
 
 		}
 
@@ -662,8 +899,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 		LocalTime[] checkpoints_copy = new LocalTime[checkpoints.length + 1];
 		checkpoints_copy[checkpoints.length] = elapsedTime;
 
-		System.out.println("Elapsed Time: " + elapsedTime);
+		// System.out.println("Elapsed Time: " + elapsedTime);
 
+		// stage object with elapsed time added to rider's private hashmap
+		Riders.riders_hashmap.get(riderId).addStageResultsToRidersHashMap(stage, elapsedTime);
 		stage.updateResults(riderId, checkpoints, checkpoints_copy);
 
 		int index = stage.getNumberOfRegisteredRiders();
@@ -672,16 +911,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 			stage.addToElapsedSortedArrays(index, riderId, checkpoints);
 		}
 
-		else if(index >1) {
-			LocalTime prevTime = stage.getLastElapsedTimeInArray(index);
-
-			if (elapsedTime.isBefore(prevTime)) {
-				stage.swapSortElapsedTimes(index, index - 1, elapsedTime, prevTime);
-			}
+		else if (index >= 1) {
+			stage.getRidersRankingInStage(stageId);
+			stage.addToElapsedSortedArrays(index, riderId, checkpoints);
 
 		}
 	}
 
+	/**
+	 * Get the times of a rider in a stage.
+	 *
+	 * @param stageId The ID of the stage the result refers to.
+	 * @param riderId The ID of the rider.
+	 * @return The array of times at which the rider reached each of the segments of
+	 *         the stage and the total elapsed time. The elapsed time is the
+	 *         difference between the finish time and the start time. Return an
+	 *         empty array if there is no result registered for the rider in the
+	 *         stage.
+	 * @throws IDNotRecognisedException If the ID does not match to any rider or
+	 *                                  stage in the system.
+	 */
 	@Override
 	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
 		// Checks if the id matches any of the riders in the system
@@ -708,23 +957,21 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 		LocalDateTime startTime = Stages.stages_hashmap.get(stageId).getStartTime();
 		if (startTime != null) {
-			// String hour = startTime.minusHours(results[results.length -
-			// 1].getHour()).toString();
-			// String minute = startTime.minusMinutes(results[results.length -
-			// 1].getMinute()).toString();
-			// String seconds = startTime.minusSeconds(results[results.length -
-			// 1].getSecond()).toString();
-			// String nanoOfSecond = startTime.minusNanos(results[results.length -
-			// 1].getNano()).toString();
-			// LocalTime elapsedTime = LocalTime.of(Integer.parseInt(hour),
-			// Integer.parseInt(minute),
-			// Integer.parseInt(seconds), Integer.parseInt(nanoOfSecond));
-			// results[results.length] = elapsedTime;
+			// LocalTime[] results = Stages.stages_hashmap.get(stageId)
+			// .getRidersResults(riderId);
 
-			LocalTime[] results = Stages.stages_hashmap.get(stageId)
-					.getRidersResults(riderId);
+			// return results;
+			int[] segments = Stages.stages_hashmap.get(stageId).getStageSegments();
+			LocalTime[] array = new LocalTime[segments.length + 1];
+			int ctr = 0;
+			for (int segmentId : segments) {
+				array[ctr] = Riders.riders_hashmap.get(riderId).getSegmentSpecificResult(segmentId);
+				ctr++;
+			}
+			// Adds the elapsed time after the segment times.
+			array[ctr] = Riders.riders_hashmap.get(riderId).getElapsedTimeInStage(Stages.stages_hashmap.get(stageId));
 
-			return results;
+			return array;
 
 		} else {
 			LocalTime[] emptyArray = new LocalTime[0];
@@ -732,6 +979,25 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 	}
 
+	/**
+	 * For the general classification, the aggregated time is based on the adjusted
+	 * elapsed time, not the real elapsed time. Adjustments are made to take into
+	 * account groups of riders finishing very close together, e.g., the peloton. If
+	 * a rider has a finishing time less than one second slower than the
+	 * previous rider, then their adjusted elapsed time is the smallest of both. For
+	 * instance, a stage with 200 riders finishing "together" (i.e., less than 1
+	 * second between consecutive riders), the adjusted elapsed time of all riders
+	 * should be the same as the first of all these riders, even if the real gap
+	 * between the 200th and the 1st rider is much bigger than 1 second. There is no
+	 * adjustments on elapsed time on time-trials.
+	 *
+	 * @param stageId The ID of the stage the result refers to.
+	 * @param riderId The ID of the rider.
+	 * @return The adjusted elapsed time for the rider in the stage. Return an empty
+	 *         array if there is no result registered for the rider in the stage.
+	 * @throws IDNotRecognisedException If the ID does not match to any rider or
+	 *                                  stage in the system.
+	 */
 	@Override
 	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
 		// Checks if the id matches any of the riders in the system
@@ -755,10 +1021,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("The ID does not match to any rider in the system");
 		}
 		if (Stages.stages_hashmap.get(stageId).containsResults(riderId) == true) {
-			calculateAdjustedElapsedTimes(0, stageId);
+			calculateAdjustedElapsedTimes(stageId);
 			int index = Stages.stages_hashmap.get(stageId).getIndexOfSortedRiderId(riderId);
 			LocalTime time = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(index);
-			System.out.println("THIS ONE BOIS");
+			// System.out.println("THIS ONE BOIS");
 			return time;
 
 		} else {
@@ -770,6 +1036,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 	}
 
+	/**
+	 * Removes the stage results from the rider.
+	 *
+	 * @param stageId The ID of the stage the result refers to.
+	 * @param riderId The ID of the rider.
+	 * @throws IDNotRecognisedException If the ID does not match to any rider or
+	 *                                  stage in the system.
+	 */
 	@Override
 	public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
 		// Checks if the id matches any of the riders in the system
@@ -791,13 +1065,21 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (riderIds.contains(riderId) == false) {
 			// If conditions are met then IDNotRecognisedException is thrown
 			throw new IDNotRecognisedException("The ID does not match to any rider in the system");
-		}
-		else{
+		} else {
 			Stages.stages_hashmap.get(stageId).removeResults(riderId);
 		}
 
 	}
 
+	/**
+	 * Get the riders finished position in a a stage.
+	 *
+	 * @param stageId The ID of the stage being queried.
+	 * @return A list of riders ID sorted by their elapsed time. An empty list if
+	 *         there is no result for the stage.
+	 * @throws IDNotRecognisedException If the ID does not match any stage in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
@@ -813,14 +1095,27 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("This Stage ID is not found");
 		}
 
-		int[] list = Stages.stages_hashmap.get(stageId).getRidersRankList();
+		// int[] list = Stages.stages_hashmap.get(stageId).getRidersRankList();
 		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() != 0) {
-			return list;
+
+			return Stages.stages_hashmap.get(stageId).getRidersRankList();
 		} else {
 			int[] emptyList = new int[1];
 			return emptyList;
 		}
 	}
+
+	/**
+	 * Get the adjusted elapsed times of riders in a stage.
+	 *
+	 * @param stageId The ID of the stage being queried.
+	 * @return The ranked list of adjusted elapsed times sorted by their finish
+	 *         time. An empty list if there is no result for the stage. These times
+	 *         should match the riders returned by
+	 *         {@link #getRidersRankInStage(int)}.
+	 * @throws IDNotRecognisedException If the ID does not match any stage in the
+	 *                                  system.
+	 */
 
 	@Override
 	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
@@ -837,15 +1132,36 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("This Stage ID is not found");
 		}
 
-		LocalTime[] list = Stages.stages_hashmap.get(stageId).getRidersRankedAdjustedList();
+		int[] IdsSortedByElapsedTime = getRidersRankInStage(stageId);
+		LocalTime[] adjustedList = new LocalTime[IdsSortedByElapsedTime.length];
+		int index = 0;
+		for (int id : IdsSortedByElapsedTime) {
+			LocalTime elapsedTime = Riders.riders_hashmap.get(id)
+					.getElapsedTimeInStage(Stages.stages_hashmap.get(stageId));
+			adjustedList[index] = elapsedTime;
+			index++;
+		}
+		// LocalTime[] list =
+		// Stages.stages_hashmap.get(stageId).getRidersRankedAdjustedList();
 		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() != 0) {
-			return list;
+			return adjustedList;
 		} else {
 			LocalTime[] emptyList = new LocalTime[1];
 			return emptyList;
 		}
 	}
 
+	/**
+	 * Get the number of points obtained by each rider in a stage.
+	 *
+	 * @param stageId The ID of the stage being queried.
+	 * @return The ranked list of points each riders received in the stage, sorted
+	 *         by their elapsed time. An empty list if there is no result for the
+	 *         stage. These points should match the riders returned by
+	 *         {@link #getRidersRankInStage(int)}.
+	 * @throws IDNotRecognisedException If the ID does not match any stage in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
@@ -858,12 +1174,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 			}
 		}
 		if (flag == false) {
-			System.out.println("UGH");///////////////////////////////////////////////////////////////////////////////////////////////////// delete
-										///////////////////////////////////////////////////////////////////////////////////////////////////// this
+			// System.out.println("UGH");
 			// If the Id does not match then IDNotRecognisedException is thrown
 			throw new IDNotRecognisedException("This Stage ID is not found");
 		}
-		if (Stages.stages_hashmap.get(stageId).getState() == "RESULTS") {
+		if (Stages.stages_hashmap.get(stageId).getState() == "Preparing") {
 
 			calculateAllRidersPointsInStage(stageId, "SPRINT");
 
@@ -875,8 +1190,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	
+	/** 
+	 * @param stageId
+	 * @param pointsDistributionChoice
+	 */
 	public void calculateAllRidersPointsInStage(int stageId, String pointsDistributionChoice) {
 		Stages stage = Stages.stages_hashmap.get(stageId);
+		// int[] riderIds = stage.getRidersRankList();
 		int[] riderIds = stage.getRidersRankList();
 		int index = 0;
 		ArrayList<SegmentType> segments = stage.getAllSegmentValues();
@@ -885,56 +1206,89 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (pointsDistributionChoice.equals("Sprint")) {
 			int typeIndex = 0;
 
+			// for (int x=0; x<riderIds.length;x++){
 			for (int id : riderIds) {
 
 				switch (type) {
 					case FLAT:
-						stage.addToRiderPoints(index, flat[index]);
+						stage.addToRiderPoints(index, flat[index], id);
 
 					case MEDIUM_MOUNTAIN:
-						stage.addToRiderPoints(index, medium_mountain[index]);
+						stage.addToRiderPoints(index, medium_mountain[index], id);
 						stage.addToRidersMountainPts(index, medium_mountain[index]);
 
 					case HIGH_MOUNTAIN:
-						stage.addToRiderPoints(index, high_mountain[index]);
+						stage.addToRiderPoints(index, high_mountain[index], id);
 						stage.addToRidersMountainPts(index, medium_mountain[index]);
 
 					case TT:
-						stage.addToRiderPoints(index, time_trial[index]);
+						stage.addToRiderPoints(index, time_trial[index], id);
 				}
 
 				index++;
-			}
 
-			if (type != StageType.TT) {
-				// there are no segments in a TT Stage.
-			}
+				if (type != StageType.TT) {
+					// there are no segments in a TT Stage.
+				}
 
-			else {
-				for (int u = 0; u < segments.size(); u++) {
-					SegmentType segment = segments.get(u);
-					// for (SegmentType segment : segments) {
-					if (segment == SegmentType.valueOf("SPRINT")) {
-						stage.searchSpecificSegmentAndSort(SegmentType.valueOf("SPRINT"), typeIndex);
-						int final_index = stage.getSortedRiderIndexBySegment(typeIndex, index);
+				else {
+					for (int u = 0; u < segments.size(); u++) {
+						SegmentType segment = segments.get(u);
+						// for (SegmentType segment : segments) {
+						if (segment == SegmentType.valueOf("SPRINT")) {
+							stage.searchSpecificSegmentAndSort(SegmentType.valueOf("SPRINT"), typeIndex);
+							int final_index = stage.getSortedRiderIndexBySegment(typeIndex, index);
 
-						stage.addToRiderPoints(index, intermediate_sprint[final_index]);
+							stage.addToRiderPoints(index, intermediate_sprint[final_index], id);
+						}
 					}
 				}
 			}
 
 		}
 
-		else if (pointsDistributionChoice.equals("GC")) {
-			int typeIndex = 1;
-		}
+		// else if (pointsDistributionChoice.equals("GC")) {
+		// 	int typeIndex = 1;
 
-		else if (pointsDistributionChoice.equals("Mountain")) {
-			int typeIndex = 2;
-			stage.searchSpecificSegmentAndSort(SegmentType.valueOf(""), typeIndex);
-		}
+		// 	int[] IdsSortedByElapsedTime = Stages.stages_hashmap.get(stageId).getRidersRankList();
+		// 	LocalTime[] adjustedList = new LocalTime[IdsSortedByElapsedTime.length];
+		// 	int ctr = 0;
+		// 	for (int id : IdsSortedByElapsedTime) {
+		// 		LocalTime elapsedTime = Riders.riders_hashmap.get(id)
+		// 				.getElapsedTimeInStage(Stages.stages_hashmap.get(stageId));
+		// 		adjustedList[ctr] = elapsedTime;
+		// 		ctr++;
+		// 	}
+		// 	int counter2 = 0;
+		// 	for (int riderId: IdsSortedByElapsedTime){
+		// 		for()
+		// 		LocalTime adjustedTime = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(counter2++);
+
+				
+				
+		// 	}
+
+		// 	// int [] adjustedTimes = Stages.stages_hashmap.get(stageId).getRidersRankedAdjustedList();
+
+		// }
+
+		// else if (pointsDistributionChoice.equals("Mountain")) {
+		// 	int typeIndex = 2;
+		// 	stage.searchSpecificSegmentAndSort(SegmentType.valueOf(""), typeIndex);
+		// }
 	}
 
+	/**
+	 * Get the number of mountain points obtained by each rider in a stage.
+	 *
+	 * @param stageId The ID of the stage being queried.
+	 * @return The ranked list of mountain points each riders received in the stage,
+	 *         sorted by their finish time. An empty list if there is no result for
+	 *         the stage. These points should match the riders returned by
+	 *         {@link #getRidersRankInStage(int)}.
+	 * @throws IDNotRecognisedException If the ID does not match any stage in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
 		Collection<Stages> stageObject = Stages.stages_hashmap.values();
@@ -961,6 +1315,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * Method empties this MiniCyclingPortalInterface of its contents and resets all
+	 * internal counters.
+	 */
 	@Override
 	public void eraseCyclingPortal() {
 
@@ -981,6 +1339,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 		Riders.total_riders = 0;
 	}
 
+	/**
+	 * Method saves this MiniCyclingPortalInterface contents into a serialised file,
+	 * with the filename given in the argument.
+	 *
+	 * @param filename Location of the file to be saved.
+	 * @throws IOException If there is a problem experienced when trying to save the
+	 *                     store contents to the file.
+	 */
 	@Override
 	public void saveCyclingPortal(String filename) throws IOException {
 		FileOutputStream fileOut = new FileOutputStream(filename);
@@ -988,6 +1354,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 		out.close();
 	}
 
+	/**
+	 * Method should load and replace this MiniCyclingPortalInterface contents with
+	 * the
+	 * serialised contents stored in the file given in the argument.
+	 *
+	 * @param filename Location of the file to be loaded.
+	 * @throws IOException            If there is a problem experienced when trying
+	 *                                to load the store contents from the file.
+	 * @throws ClassNotFoundException If required class files cannot be found when
+	 *                                loading.
+	 */
 	@Override
 	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
 		FileInputStream fileIn = new FileInputStream(filename);
@@ -996,6 +1373,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 		fileIn.close();
 	}
 
+	/**
+	 * The method removes the race and all its related information, i.e., stages,
+	 * segments, and results.
+	 *
+	 * @param name The name of the race to be removed.
+	 * @throws NameNotRecognisedException If the name does not match to any race in
+	 *                                    the system.
+	 */
 	@Override
 	public void removeRaceByName(String name) throws NameNotRecognisedException {
 		Collection<Races> raceObjects = Races.races_hashmap.values();
@@ -1005,12 +1390,25 @@ public class CyclingPortal implements CyclingPortalInterface {
 				throw new NameNotRecognisedException("This raceId is not found");
 			}
 		}
-		Collection<Races> objects = Races.getRaceObjects();
-		for (Races obj : objects) {
-			obj.deleteRace(obj.getRaceId());
+		Collection<Races> races = Races.races_hashmap.values();
+		for(Races race: races){
+			if (race.getName().equals(name)){
+				race.deleteRace();
+			}
 		}
 	}
 
+	/**
+	 * Get the general classification times of riders in a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return A list of riders’ times sorted by the sum of their adjusted elapsed
+	 *         times in all stages of the race. An empty list if there is no result
+	 *         for any stage in the race. These times should match the riders
+	 *         returned by {@link #getRidersGeneralClassificationRank(int)}.
+	 * @throws IDNotRecognisedException If the ID does not match any race in the
+	 *                                  system.
+	 */
 	@Override
 	public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -1028,7 +1426,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		int[] ids = Races.races_hashmap.get(raceId).getStageIds();
-		System.out.println(Stages.stages_hashmap.get(ids[0]).getNumberOfRegisteredRiders());
+		// System.out.println(Stages.stages_hashmap.get(ids[0]).getNumberOfRegisteredRiders());
 		Stages.stages_hashmap.get(ids[0])
 				.resetArrayListValues(Stages.stages_hashmap.get(ids[0]).getNumberOfRegisteredRiders());
 
@@ -1055,6 +1453,18 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return finalSortedRidersArray;
 	}
 
+	/**
+	 * Get the overall points of riders in a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return A list of riders’ points (i.e., the sum of their points in all stages
+	 *         of the race), sorted by the total elapsed time. An empty list if
+	 *         there is no result for any stage in the race. These points should
+	 *         match the riders returned by
+	 *         {@link #getRidersGeneralClassificationRank(int)}.
+	 * @throws IDNotRecognisedException If the ID does not match any race in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -1074,15 +1484,20 @@ public class CyclingPortal implements CyclingPortalInterface {
 		int[] stageIds = Races.races_hashmap.get(raceId).getStageIds();
 		int[] totalPoints = new int[Stages.stages_hashmap.get(stageIds[0]).getNumberOfRegisteredRiders()];
 
-		for (int stageId : stageIds) {
-			int[] points = getRidersPointsInStage(stageId);
-			for (int x = 0; x < totalPoints.length; x++) {
+		for(int x=0; x<totalPoints.length;x++){
+		// for (int stageId : stageIds) {
+			int[] points = getRidersPointsInStage(stageIds[x]);
 				totalPoints[x] = totalPoints[x] + points[x];
-			}
 		}
 		return totalPoints;
 	}
 
+	
+	/** 
+	 * @param raceId
+	 * @return int[]
+	 * @throws IDNotRecognisedException
+	 */
 	@Override
 	public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -1180,6 +1595,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return sortedPointsByTotalElapsedTimeArray;
 	}
 
+	/**
+	 * Get the general classification rank of riders in a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return A ranked list of riders’ IDs sorted ascending by the sum of their
+	 *         adjusted elapsed times in all stages of the race. That is, the first
+	 *         in this list is the winner (least time). An empty list if there is no
+	 *         result for any stage in the race.
+	 * @throws IDNotRecognisedException If the ID does not match any race in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -1228,6 +1654,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+	/**
+	 * Get the ranked list of riders based on the points classification in a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return A ranked list of riders’ IDs sorted descending by the sum of their
+	 *         points in all stages of the race. That is, the first in this list is
+	 *         the winner (more points). An empty list if there is no result for any
+	 *         stage in the race.
+	 * @throws IDNotRecognisedException If the ID does not match any race in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -1247,6 +1684,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return null;
 	}
 
+	/**
+	 * Get the ranked list of riders based on the mountain classification in a race.
+	 *
+	 * @param raceId The ID of the race being queried.
+	 * @return A ranked list of riders’ IDs sorted descending by the sum of their
+	 *         mountain points in all stages of the race. That is, the first in this
+	 *         list is the winner (more points). An empty list if there is no result
+	 *         for any stage in the race.
+	 * @throws IDNotRecognisedException If the ID does not match any race in the
+	 *                                  system.
+	 */
 	@Override
 	public int[] getRidersMountainPointClassificationRank(int raceId) throws IDNotRecognisedException {
 		// Checks if the raceId matches to any in the system.
@@ -1265,15 +1713,27 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return null;
 	}
 
-	public void calculateAdjustedElapsedTimes(int index, int stageId) {
+	
+	/** 
+	 * @param stageId
+	 */
+	public void calculateAdjustedElapsedTimes(int stageId) {
 
 		if (Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() == 1) {
 
 		} else {
-			LocalTime a = Stages.stages_hashmap.get(stageId).getElapsedTimeInArray(index);
-			LocalTime b = Stages.stages_hashmap.get(stageId).getElapsedTimeInArray(++index);
 
-			while (index < Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders()) {
+			int index = 0;
+			LocalTime a = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(index);
+			LocalTime b = Stages.stages_hashmap.get(stageId).getRiderAdjElapsedTime(++index);
+
+			// LocalTime a =
+			// Stages.stages_hashmap.get(stageId).getElapsedTimeInArray(index);
+			// LocalTime b =
+			// Stages.stages_hashmap.get(stageId).getElapsedTimeInArray(++index);
+
+			while (index < Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() - 1) {
+
 				int aInSeconds = a.toSecondOfDay();
 				int bInSeconds = b.toSecondOfDay();
 				if ((bInSeconds - aInSeconds) <= 1) {
@@ -1281,8 +1741,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 					Stages.stages_hashmap.get(stageId).setValueInAdjustedTimeArray(index + 1, a);
 				}
 
-				a = b;
-				b = Stages.stages_hashmap.get(stageId).getNextElapsedTimeInArray(++index);
+				index++;
+				if (index < Stages.stages_hashmap.get(stageId).getNumberOfRegisteredRiders() - 1) {
+					a = b;
+					b = Stages.stages_hashmap.get(stageId).getNextElapsedTimeInArray(index);
+				}
+
 			}
 
 		}
